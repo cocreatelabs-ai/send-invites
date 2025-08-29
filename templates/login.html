@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Log in</h1>
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+<form method="POST" action="/login">
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required>
+
+    <button type="submit">Log in</button>
+</form>
+
+<div class="auth-options">
+    <p>Don't have an account? <a href="/register">Create one</a></p>
+    <div class="divider-text">or</div>
+    <p class="anonymous-option">
+        <a href="/anonymous-rsvp/1" class="btn btn-anonymous">RSVP Without Account</a>
+    </p>
+    <p class="anonymous-help">Quick RSVP - just enter your name, no account needed</p>
+</div>
+{% endblock %}

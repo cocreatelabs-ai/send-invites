@@ -1,0 +1,11 @@
+[project]
+name = "invite-app"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "gunicorn>=23.0.0",
+    "jinja2>=3.1.6",
+    "sqlite-utils>=3.38",
+]

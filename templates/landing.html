@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="landing-page">
+    <div class="landing-card">
+        <div class="invitation-preview">
+            <h1>You're Invited!</h1>
+            <p class="event-preview">A little pearl is on the way</p>
+            <p class="host-preview">Hosted by Rohan</p>
+        </div>
+        
+        <div class="rsvp-options">
+            <h2>How would you like to RSVP?</h2>
+            
+            <div class="option-cards">
+                <div class="option-card">
+                    <h3>🚀 Quick RSVP</h3>
+                    <p>Just enter your name - no account needed</p>
+                    <a href="/anonymous-rsvp/1" class="btn btn-primary btn-large">RSVP Now</a>
+                </div>
+                
+                <div class="option-card">
+                    <h3>👤 Account RSVP</h3>
+                    <p>Login or create account for full features</p>
+                    <div class="account-buttons">
+                        <a href="/login" class="btn btn-secondary">Login</a>
+                        <a href="/register" class="btn btn-secondary">Register</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="benefits">
+                <div class="benefit-section">
+                    <h4>Quick RSVP includes:</h4>
+                    <ul>
+                        <li>✅ Instant RSVP submission</li>
+                        <li>✅ Specify adults & kids attending</li>
+                        <li>✅ View event details & registry</li>
+                    </ul>
+                </div>
+                
+                <div class="benefit-section">
+                    <h4>Account RSVP adds:</h4>
+                    <ul>
+                        <li>✅ Leave comments for hosts</li>
+                        <li>✅ Update your RSVP anytime</li>
+                        <li>✅ Personalized experience</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

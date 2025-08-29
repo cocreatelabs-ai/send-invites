@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="logout-link">
+    <a href="/logout">Logout</a>
+</div>
+<div class="admin-panel">
+    <h2>Customize Your Event</h2>
+    <form method="POST" action="/admin/event/{{ event_id }}">
+        <div class="form-group">
+            <label for="title">Event Title:</label>
+            <input type="text" id="title" name="title" value="{{ event.title }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="3">{{ event.description }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="host">Hosted by:</label>
+            <input type="text" id="host" name="host" value="{{ event.host }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="datetime">Date & Time:</label>
+            <input type="datetime-local" id="datetime" name="datetime" value="{{ event.datetime }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="location">Location:</label>
+            <textarea id="location" name="location" rows="2">{{ event.location }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="registry1">Registry 1 (Babylist URL):</label>
+            <input type="url" id="registry1" name="registry1" value="{{ event.registry1 }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="registry2">Registry 2 (Amazon URL):</label>
+            <input type="url" id="registry2" name="registry2" value="{{ event.registry2 }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="card_theme">Card Theme:</label>
+            <select id="card_theme" name="card_theme">
+                <option value="ocean"{% if event.card_theme == 'ocean' %} selected{% endif %}>Ocean Theme</option>
+                <option value="garden"{% if event.card_theme == 'garden' %} selected{% endif %}>Garden Theme</option>
+                <option value="classic"{% if event.card_theme == 'classic' %} selected{% endif %}>Classic Theme</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="/event/{{ event_id }}" class="btn btn-secondary">Preview Event</a>
+    </form>
+    
+    <div class="rsvp-tracking">
+        <h3>RSVP Tracking</h3>
+        <div class="rsvp-summary">
+            <div class="rsvp-stat">
+                <span class="stat-number">{{ rsvp_stats.attending }}</span>
+                <span class="stat-label">Attending</span>
+            </div>
+            <div class="rsvp-stat">
+                <span class="stat-number">{{ rsvp_stats.not_attending }}</span>
+                <span class="stat-label">Not Attending</span>
+            </div>
+            <div class="rsvp-stat">
+                <span class="stat-number">{{ rsvp_stats.no_response }}</span>
+                <span class="stat-label">No Response</span>
+            </div>
+        </div>
+        
+        <div class="quantity-summary">
+            <div class="quantity-stat">
+                <span class="stat-number">{{ rsvp_stats.total_adults }}</span>
+                <span class="stat-label">Total Adults</span>
+            </div>
+            <div class="quantity-stat">
+                <span class="stat-number">{{ rsvp_stats.total_kids }}</span>
+                <span class="stat-label">Total Kids</span>
+            </div>
+            <div class="quantity-stat">
+                <span class="stat-number">{{ rsvp_stats.total_adults + rsvp_stats.total_kids }}</span>
+                <span class="stat-label">Total Guests</span>
+            </div>
+        </div>
+        
+        <div class="guest-list">
+            <h4>Guest List</h4>
+            <table class="guests-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>RSVP Status</th>
+                        <th>Adults</th>
+                        <th>Kids</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for guest in guests %}
+                    <tr>
+                        <td>
+                            {{ guest.name }}
+                            {% if guest.is_anonymous %}
+                                <span class="anonymous-badge">Anonymous</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ guest.email or '—' }}</td>
+                        <td class="rsvp-status rsvp-{{ guest.rsvp or 'pending' }}">
+                            {% if guest.rsvp == 'yes' %}
+                                ✅ Attending
+                            {% elif guest.rsvp == 'no' %}
+                                ❌ Not Attending
+                            {% else %}
+                                ⏳ No Response
+                            {% endif %}
+                        </td>
+                        <td class="quantity-cell">
+                            {% if guest.rsvp == 'yes' %}{{ guest.adults_qty }}{% else %}—{% endif %}
+                        </td>
+                        <td class="quantity-cell">
+                            {% if guest.rsvp == 'yes' %}{{ guest.kids_qty }}{% else %}—{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

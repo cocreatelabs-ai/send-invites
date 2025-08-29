@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="event-card anonymous-rsvp-card">
+    {% if header_image %}
+    <img src="/static/images/{{ header_image }}" class="header-image" alt="Invitation header">
+    {% endif %}
+    <h2>{{ title }}</h2>
+    <p class="description">{{ description }}</p>
+    
+    <div class="anonymous-rsvp-form">
+        <h3>Please RSVP</h3>
+        <p>We'd love to have you! Please let us know if you can make it.</p>
+        
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST" action="/anonymous-rsvp/{{ event_id }}">
+            <div class="form-group">
+                <label for="guest_name">Your Name:</label>
+                <input type="text" id="guest_name" name="guest_name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="guest_email">Your Email (optional):</label>
+                <input type="email" id="guest_email" name="guest_email" placeholder="For updates about the event">
+            </div>
+            
+            <div class="rsvp-options">
+                <h4>Will you attend?</h4>
+                <div class="rsvp-choice">
+                    <input type="radio" id="rsvp_yes" name="rsvp" value="yes" required>
+                    <label for="rsvp_yes">Yes, I'll be there! 🎉</label>
+                </div>
+                <div class="rsvp-choice">
+                    <input type="radio" id="rsvp_no" name="rsvp" value="no" required>
+                    <label for="rsvp_no">Sorry, can't make it</label>
+                </div>
+            </div>
+            
+            <div class="quantity-section" id="quantity_section" style="display: none;">
+                <h4>How many people?</h4>
+                <div class="quantity-inputs">
+                    <div class="quantity-group">
+                        <label for="adults_qty">Adults:</label>
+                        <input type="number" id="adults_qty" name="adults_qty" min="1" max="10" value="1">
+                    </div>
+                    <div class="quantity-group">
+                        <label for="kids_qty">Kids:</label>
+                        <input type="number" id="kids_qty" name="kids_qty" min="0" max="10" value="0">
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary rsvp-submit">Submit RSVP</button>
+        </form>
+        
+        <div class="event-details">
+            <h4>Event Details</h4>
+            <div class="detail-item">
+                <span class="label">Hosted by:</span>
+                <span class="value">{{ host }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Date:</span>
+                <span class="value">{{ date_display }}<br>{{ time_display }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Location:</span>
+                <span class="value">{{ location }}</span>
+            </div>
+            
+            {% if registry1 or registry2 %}
+            <div class="registry">
+                <h4>Registry</h4>
+                <div class="registry-buttons">
+                    {% if registry1 %}<a href="{{ registry1 }}" target="_blank" class="btn registry-btn">Babylist</a>{% endif %}
+                    {% if registry2 %}<a href="{{ registry2 }}" target="_blank" class="btn registry-btn">Amazon</a>{% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rsvpYes = document.getElementById('rsvp_yes');
+    const rsvpNo = document.getElementById('rsvp_no');
+    const quantitySection = document.getElementById('quantity_section');
+    
+    function toggleQuantitySection() {
+        if (rsvpYes.checked) {
+            quantitySection.style.display = 'block';
+        } else {
+            quantitySection.style.display = 'none';
+        }
+    }
+    
+    rsvpYes.addEventListener('change', toggleQuantitySection);
+    rsvpNo.addEventListener('change', toggleQuantitySection);
+});
+</script>
+{% endblock %}

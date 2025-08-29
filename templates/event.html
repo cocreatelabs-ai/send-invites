@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header-links">
+    {% if is_admin %}
+        <a href="/admin/event/{{ event_id }}" class="admin-link">Edit Event</a>
+        <span class="divider">|</span>
+        <a href="/admin/event/{{ event_id }}" class="admin-link">Track RSVPs</a>
+        <span class="divider">|</span>
+    {% endif %}
+    <a href="/logout" class="logout-link">Logout</a>
+</div>
+
+<div class="event-card">
+    {% if header_image %}
+    <img src="/static/images/{{ header_image }}" class="header-image" alt="Invitation header">
+    {% endif %}
+    <h2>{{ title }}</h2>
+    <p class="to-line">To: {{ user_name }}</p>
+    {% if description %}
+    <p class="description">{{ description }}</p>
+    {% endif %}
+    {% if rsvp_status == 'yes' %}
+    <div class="rsvp-message rsvp-thanks">
+        <p>🎉 Thanks for attending! We can't wait to celebrate with you!</p>
+    </div>
+    {% elif rsvp_status == 'no' %}
+    <div class="rsvp-message rsvp-miss">
+        <p>😔 Oh, sad to miss you! We'll be thinking of you.</p>
+    </div>
+    {% endif %}
+    <div class="rsvp-buttons">
+        <form method="POST" action="/event/{{ event_id }}" class="rsvp-form" id="rsvp-yes-form">
+            <input type="hidden" name="action" value="rsvp">
+            <input type="hidden" name="response" value="yes">
+            <button type="button" class="btn rsvp-yes" onclick="showQuantityFields()"{% if rsvp_status=='yes' %} disabled{% endif %}>Will attend</button>
+            
+            <div class="quantity-fields" id="quantity-fields" style="display: {% if rsvp_status=='yes' %}block{% else %}none{% endif %};">
+                <div class="quantity-group">
+                    <label for="adults_qty">Adults:</label>
+                    <input type="number" id="adults_qty" name="adults_qty" min="1" max="10" value="{{ adults_qty or 1 }}">
+                </div>
+                <div class="quantity-group">
+                    <label for="kids_qty">Kids:</label>
+                    <input type="number" id="kids_qty" name="kids_qty" min="0" max="10" value="{{ kids_qty or 0 }}">
+                </div>
+                <button type="submit" class="btn btn-confirm">Confirm Attendance</button>
+            </div>
+        </form>
+        <form method="POST" action="/event/{{ event_id }}">
+            <input type="hidden" name="action" value="rsvp">
+            <input type="hidden" name="response" value="no">
+            <button type="submit" class="btn rsvp-no"{% if rsvp_status=='no' %} disabled{% endif %}>Will not attend</button>
+        </form>
+    </div>
+    
+    <script>
+    function showQuantityFields() {
+        document.getElementById('quantity-fields').style.display = 'block';
+        document.getElementById('adults_qty').focus();
+    }
+    </script>
+    <div class="details">
+        <div class="detail-item">
+            <span class="label">Hosted by</span>
+            <span class="value">{{ host }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Date</span>
+            <span class="value">{{ date_display }}<br>{{ time_display }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Address</span>
+            <span class="value">{{ location }}</span>
+        </div>
+    </div>
+    <div class="registry">
+        <h3>Registry</h3>
+        <div class="registry-buttons">
+            {% if registry1 %}<a href="{{ registry1 }}" target="_blank" class="btn registry-btn">Babylist</a>{% endif %}
+            {% if registry2 %}<a href="{{ registry2 }}" target="_blank" class="btn registry-btn">Amazon</a>{% endif %}
+        </div>
+    </div>
+    <div class="comments-section">
+        <h3>Comment Wall</h3>
+        <p>We're so excited to see everyone soon! Please leave a note in our guest book below.</p>
+        <ul class="comments-list">
+            {% if comments %}
+                {% for comment, name, timestamp in comments %}
+                    <li><strong>{{ name }}:</strong> {{ comment }}</li>
+                {% endfor %}
+            {% else %}
+                <li>No comments yet.</li>
+            {% endif %}
+        </ul>
+        <form method="POST" action="/event/{{ event_id }}" class="comment-form">
+            <input type="hidden" name="action" value="comment">
+            <textarea name="comment" placeholder="Add a comment"></textarea>
+            <button type="submit" class="btn">Post</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

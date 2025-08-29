@@ -1,0 +1,1132 @@
+/* Basic styles for the invitation app */
+
+body {
+    background-color: #FCF9F2;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.event-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.header-image {
+    display: block;
+    width: 100%;
+}
+
+h1, h2, h3 {
+    color: #333333;
+    margin-top: 20px;
+}
+
+.to-line {
+    text-align: center;
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+.description {
+    text-align: center;
+    margin: 0 30px 20px 30px;
+    color: #444444;
+}
+
+.rsvp-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: 2px solid #333333;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: transparent;
+    color: #333333;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn:hover:not(:disabled) {
+    background-color: #f0f0f0;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.rsvp-yes {
+    background-color: #333333;
+    color: #ffffff;
+}
+
+.rsvp-yes:hover:not(:disabled) {
+    background-color: #555555;
+}
+
+.rsvp-no {
+    background-color: #ffffff;
+    color: #333333;
+}
+
+.rsvp-no:hover:not(:disabled) {
+    background-color: #fafafa;
+}
+
+.details {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 0 30px;
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    flex: 1;
+    min-width: 220px;
+    margin-bottom: 10px;
+}
+
+.detail-item .label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.detail-item .value {
+    display: block;
+}
+
+.registry {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.registry-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.comments-section {
+    margin: 0 30px 30px 30px;
+}
+
+.comments-section p {
+    margin-bottom: 10px;
+}
+
+.comments-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 10px 0;
+}
+
+.comments-list li {
+    margin-bottom: 6px;
+}
+
+.comment-form textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.comment-form .btn {
+    width: 100%;
+    margin-top: 8px;
+}
+
+/* Form styles for login/register */
+form label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+
+form button {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background-color: #333333;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #555555;
+}
+
+.error {
+    color: #cc0000;
+    font-weight: bold;
+}
+
+.header-links {
+    text-align: right;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1000;
+    background: rgba(252, 249, 242, 0.9);
+    padding: 10px 0;
+    backdrop-filter: blur(10px);
+}
+
+.header-links a {
+    color: #666666;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.header-links a:hover {
+    text-decoration: underline;
+}
+
+.header-links .admin-link {
+    color: #0066cc;
+    font-weight: bold;
+}
+
+.header-links .divider {
+    margin: 0 8px;
+    color: #cccccc;
+}
+
+.rsvp-message {
+    text-align: center;
+    margin: 20px 30px;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.rsvp-thanks {
+    background-color: #e8f5e8;
+    border: 2px solid #4caf50;
+    color: #2e7d32;
+}
+
+.rsvp-miss {
+    background-color: #fff3e0;
+    border: 2px solid #ff9800;
+    color: #e65100;
+}
+
+/* Admin Panel Styles */
+.admin-panel {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-panel h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333333;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333333;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    resize: vertical;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background-color: #0066cc;
+    color: #ffffff;
+    margin-right: 10px;
+}
+
+.btn-primary:hover {
+    background-color: #0052a3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: #ffffff;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-secondary:hover {
+    background-color: #545b62;
+}
+
+/* RSVP Tracking Styles */
+.rsvp-tracking {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #e9ecef;
+}
+
+.rsvp-tracking h3 {
+    margin-bottom: 20px;
+    color: #333333;
+}
+
+.rsvp-summary {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.rsvp-stat {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2em;
+    font-weight: bold;
+    color: #0066cc;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.guest-list h4 {
+    margin-bottom: 15px;
+    color: #333333;
+}
+
+.guests-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.guests-table th,
+.guests-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.guests-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #495057;
+}
+
+.guests-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.rsvp-status {
+    font-weight: bold;
+}
+
+.rsvp-yes {
+    color: #28a745;
+}
+
+.rsvp-no {
+    color: #dc3545;
+}
+
+.rsvp-pending {
+    color: #ffc107;
+}
+
+/* Quantity Fields Styles */
+.quantity-fields {
+    margin-top: 15px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 2px solid #28a745;
+}
+
+.quantity-group {
+    display: inline-block;
+    margin-right: 20px;
+    margin-bottom: 15px;
+}
+
+.quantity-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333333;
+}
+
+.quantity-group input[type="number"] {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.btn-confirm {
+    background-color: #28a745;
+    color: #ffffff;
+    margin-top: 10px;
+}
+
+.btn-confirm:hover {
+    background-color: #218838;
+}
+
+/* Quantity Summary Styles */
+.quantity-summary {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+    background-color: #e8f5e8;
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #28a745;
+}
+
+.quantity-stat {
+    text-align: center;
+}
+
+.quantity-stat .stat-number {
+    color: #28a745;
+}
+
+.quantity-cell {
+    text-align: center;
+    font-weight: bold;
+}
+
+.anonymous-badge {
+    display: inline-block;
+    background-color: #f8f9fa;
+    color: #6c757d;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    margin-left: 6px;
+    border: 1px solid #dee2e6;
+}
+
+/* ===============================
+   ELEGANT TYPOGRAPHY
+   =============================== */
+
+.event-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 2.2em;
+    text-align: center;
+    color: #2c3e50;
+    margin: 30px 0 20px 0;
+    letter-spacing: 1px;
+}
+
+.event-card .description {
+    font-family: 'Crimson Text', serif;
+    font-size: 1.1em;
+    line-height: 1.6;
+    font-style: italic;
+    color: #5a6c7d;
+}
+
+.event-card .detail-item .label {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #2c3e50;
+}
+
+.event-card .detail-item .value {
+    font-family: 'Crimson Text', serif;
+    color: #5a6c7d;
+}
+
+/* ===============================
+   ANONYMOUS RSVP FORM STYLES
+   =============================== */
+
+.anonymous-rsvp-card {
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+.anonymous-rsvp-form {
+    padding: 30px;
+}
+
+.anonymous-rsvp-form h3 {
+    font-family: 'Playfair Display', serif;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.anonymous-rsvp-form .form-group {
+    margin-bottom: 20px;
+}
+
+.anonymous-rsvp-form .form-group label {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+}
+
+.anonymous-rsvp-form .form-group input[type="text"],
+.anonymous-rsvp-form .form-group input[type="email"] {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-family: 'Crimson Text', serif;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.anonymous-rsvp-form .form-group input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.rsvp-options {
+    margin: 25px 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.rsvp-options h4 {
+    font-family: 'Playfair Display', serif;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.rsvp-choice {
+    margin-bottom: 12px;
+}
+
+.rsvp-choice input[type="radio"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+}
+
+.rsvp-choice label {
+    font-family: 'Crimson Text', serif;
+    font-size: 16px;
+    cursor: pointer;
+    color: #495057;
+}
+
+.quantity-section {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #e8f5e8;
+    border: 2px solid #28a745;
+    border-radius: 8px;
+}
+
+.quantity-section h4 {
+    font-family: 'Playfair Display', serif;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.quantity-inputs {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.quantity-inputs .quantity-group {
+    flex: 1;
+    min-width: 120px;
+}
+
+.quantity-inputs .quantity-group label {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.quantity-inputs .quantity-group input[type="number"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #28a745;
+    border-radius: 6px;
+    font-size: 16px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.rsvp-submit {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.rsvp-submit:hover {
+    background-color: #0056b3;
+}
+
+.event-details {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 2px solid #e9ecef;
+}
+
+.event-details h4 {
+    font-family: 'Playfair Display', serif;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.event-details .detail-item {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.event-details .detail-item .label {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    min-width: 120px;
+    color: #2c3e50;
+}
+
+.event-details .detail-item .value {
+    font-family: 'Crimson Text', serif;
+    color: #5a6c7d;
+}
+
+.event-details .registry {
+    margin-top: 20px;
+}
+
+.event-details .registry h4 {
+    margin-bottom: 15px;
+}
+
+.event-details .registry-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/* Mobile responsive for anonymous RSVP */
+@media (max-width: 480px) {
+    .anonymous-rsvp-form {
+        padding: 20px;
+    }
+    
+    .quantity-inputs {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .event-details .detail-item {
+        flex-direction: column;
+    }
+    
+    .event-details .detail-item .label {
+        min-width: auto;
+        margin-bottom: 5px;
+    }
+    
+    .event-details .registry-buttons {
+        flex-direction: column;
+    }
+}
+
+/* ===============================
+   LANDING PAGE STYLES
+   =============================== */
+
+.landing-page {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.landing-card {
+    max-width: 800px;
+    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    padding: 50px;
+    text-align: center;
+}
+
+.invitation-preview {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.invitation-preview h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3em;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.event-preview {
+    font-family: 'Crimson Text', serif;
+    font-size: 1.4em;
+    color: #5a6c7d;
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+.host-preview {
+    font-family: 'Crimson Text', serif;
+    color: #6c757d;
+    font-size: 1.1em;
+}
+
+.rsvp-options h2 {
+    font-family: 'Playfair Display', serif;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 1.8em;
+}
+
+.option-cards {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 40px;
+    justify-content: center;
+}
+
+.option-card {
+    flex: 1;
+    max-width: 300px;
+    background-color: #ffffff;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 30px 20px;
+    transition: all 0.3s ease;
+}
+
+.option-card:hover {
+    border-color: #007bff;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 123, 255, 0.1);
+}
+
+.option-card h3 {
+    font-family: 'Playfair Display', serif;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.option-card p {
+    font-family: 'Crimson Text', serif;
+    color: #6c757d;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.btn-large {
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: 600;
+    width: 100%;
+}
+
+.account-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.account-buttons .btn {
+    flex: 1;
+    padding: 12px 20px;
+    font-size: 16px;
+}
+
+.benefits {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    text-align: left;
+    background-color: #f8f9fa;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+.benefit-section {
+    flex: 1;
+    max-width: 300px;
+}
+
+.benefit-section h4 {
+    font-family: 'Playfair Display', serif;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.benefit-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.benefit-section li {
+    font-family: 'Crimson Text', serif;
+    color: #495057;
+    margin-bottom: 8px;
+    padding-left: 0;
+}
+
+/* Authentication Options Styles */
+.auth-options {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.divider-text {
+    margin: 15px 0;
+    color: #6c757d;
+    font-style: italic;
+    position: relative;
+}
+
+.divider-text::before,
+.divider-text::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background-color: #e9ecef;
+}
+
+.divider-text::before {
+    left: 0;
+}
+
+.divider-text::after {
+    right: 0;
+}
+
+.btn-anonymous {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.btn-anonymous:hover {
+    background-color: #218838;
+    text-decoration: none;
+    color: white;
+}
+
+.anonymous-help {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* Mobile responsive for landing page */
+@media (max-width: 768px) {
+    .landing-card {
+        padding: 30px 20px;
+        margin: 20px 10px;
+    }
+    
+    .invitation-preview h1 {
+        font-size: 2.2em;
+    }
+    
+    .option-cards {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .benefits {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .account-buttons {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .landing-card {
+        padding: 20px 15px;
+    }
+    
+    .invitation-preview h1 {
+        font-size: 1.8em;
+    }
+    
+    .event-preview {
+        font-size: 1.2em;
+    }
+    
+    .rsvp-options h2 {
+        font-size: 1.5em;
+    }
+}
+
+/* ===============================
+   RESPONSIVE DESIGN BREAKPOINTS
+   =============================== */
+
+/* Large Desktop (1200px+) */
+@media (min-width: 1200px) {
+    .event-card {
+        max-width: 800px;
+        margin: 20px auto;
+    }
+}
+
+/* Desktop/Laptop (1024px - 1199px) */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .event-card {
+        max-width: 90%;
+        margin: 20px auto;
+    }
+}
+
+/* Tablet (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .event-card {
+        max-width: 95%;
+        padding: 20px;
+        margin: 15px auto;
+    }
+    
+    .event-card h2 {
+        font-size: 1.9em;
+    }
+    
+    .header-links {
+        font-size: 13px;
+    }
+}
+
+/* Mobile Large (481px - 767px) */
+@media (min-width: 481px) and (max-width: 767px) {
+    .event-card {
+        max-width: 98%;
+        padding: 15px;
+        margin: 10px auto;
+    }
+    
+    .event-card h2 {
+        font-size: 1.6em;
+        margin: 20px 0 15px 0;
+    }
+    
+    .rsvp-message {
+        margin: 15px 10px;
+        padding: 12px;
+        font-size: 15px;
+    }
+    
+    .details {
+        flex-direction: column;
+        padding: 0 15px;
+    }
+    
+    .detail-item {
+        margin-bottom: 15px;
+        min-width: 100%;
+    }
+}
+
+/* Mobile Small (<= 480px) */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .event-card {
+        max-width: 100%;
+        padding: 15px;
+        margin: 5px auto;
+    }
+    
+    .event-card h2 {
+        font-size: 1.4em;
+        margin: 15px 0 10px 0;
+    }
+    
+    .event-card .description {
+        font-size: 1em;
+        margin: 0 10px 15px 10px;
+    }
+    
+    .rsvp-message {
+        margin: 10px 5px;
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    .rsvp-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .quantity-fields {
+        padding: 15px;
+        margin-top: 10px;
+    }
+    
+    .quantity-group {
+        display: block;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .quantity-group input[type="number"] {
+        width: 60px;
+    }
+    
+    .details {
+        flex-direction: column;
+        padding: 0 10px;
+    }
+    
+    .detail-item {
+        margin-bottom: 12px;
+        min-width: 100%;
+    }
+    
+    .detail-item .label {
+        font-size: 0.9em;
+    }
+    
+    .detail-item .value {
+        font-size: 0.95em;
+    }
+    
+    .registry-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+    
+    .header-links {
+        font-size: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .header-links .divider {
+        margin: 0 4px;
+    }
+    
+    .comments-section {
+        margin: 0 10px 20px 10px;
+    }
+}
+
+/* High Resolution Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .event-card {
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    }
+}
+
