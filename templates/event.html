@@ -30,28 +30,40 @@
     </div>
     {% endif %}
     <div class="rsvp-buttons">
-        <form method="POST" action="/event/{{ event_id }}" class="rsvp-form" id="rsvp-yes-form">
-            <input type="hidden" name="action" value="rsvp">
-            <input type="hidden" name="response" value="yes">
-            <button type="button" class="btn rsvp-yes" onclick="showQuantityFields()"{% if rsvp_status=='yes' %} disabled{% endif %}>Will attend</button>
-            
-            <div class="quantity-fields" id="quantity-fields" style="display: {% if rsvp_status=='yes' %}block{% else %}none{% endif %};">
-                <div class="quantity-group">
-                    <label for="adults_qty">Adults:</label>
-                    <input type="number" id="adults_qty" name="adults_qty" min="1" max="10" value="{{ adults_qty or 1 }}">
+        {% if user_name == 'Guest' %}
+            <!-- Anonymous user - show RSVP link -->
+            <div class="anonymous-rsvp-section">
+                <a href="/anonymous-rsvp/{{ event_id }}" class="btn btn-primary btn-large">RSVP for this Event</a>
+                <p class="rsvp-note">Quick RSVP - just enter your name, no account needed</p>
+                <div class="auth-options">
+                    <p><a href="/login">Have an account? Login</a> | <a href="/register">Create account</a></p>
                 </div>
-                <div class="quantity-group">
-                    <label for="kids_qty">Kids:</label>
-                    <input type="number" id="kids_qty" name="kids_qty" min="0" max="10" value="{{ kids_qty or 0 }}">
-                </div>
-                <button type="submit" class="btn btn-confirm">Confirm Attendance</button>
             </div>
-        </form>
-        <form method="POST" action="/event/{{ event_id }}">
-            <input type="hidden" name="action" value="rsvp">
-            <input type="hidden" name="response" value="no">
-            <button type="submit" class="btn rsvp-no"{% if rsvp_status=='no' %} disabled{% endif %}>Will not attend</button>
-        </form>
+        {% else %}
+            <!-- Logged in user - show regular RSVP forms -->
+            <form method="POST" action="/event/{{ event_id }}" class="rsvp-form" id="rsvp-yes-form">
+                <input type="hidden" name="action" value="rsvp">
+                <input type="hidden" name="response" value="yes">
+                <button type="button" class="btn rsvp-yes" onclick="showQuantityFields()"{% if rsvp_status=='yes' %} disabled{% endif %}>Will attend</button>
+                
+                <div class="quantity-fields" id="quantity-fields" style="display: {% if rsvp_status=='yes' %}block{% else %}none{% endif %};">
+                    <div class="quantity-group">
+                        <label for="adults_qty">Adults:</label>
+                        <input type="number" id="adults_qty" name="adults_qty" min="1" max="10" value="{{ adults_qty or 1 }}">
+                    </div>
+                    <div class="quantity-group">
+                        <label for="kids_qty">Kids:</label>
+                        <input type="number" id="kids_qty" name="kids_qty" min="0" max="10" value="{{ kids_qty or 0 }}">
+                    </div>
+                    <button type="submit" class="btn btn-confirm">Confirm Attendance</button>
+                </div>
+            </form>
+            <form method="POST" action="/event/{{ event_id }}">
+                <input type="hidden" name="action" value="rsvp">
+                <input type="hidden" name="response" value="no">
+                <button type="submit" class="btn rsvp-no"{% if rsvp_status=='no' %} disabled{% endif %}>Will not attend</button>
+            </form>
+        {% endif %}
     </div>
     
     <script>

@@ -1130,3 +1130,40 @@ form button:hover {
     }
 }
 
+/* Anonymous RSVP section on event page */
+.anonymous-rsvp-section {
+    text-align: center;
+    padding: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    color: white;
+    margin: 20px 0;
+}
+
+.anonymous-rsvp-section .btn {
+    font-size: 1.1em;
+    padding: 15px 30px;
+    margin: 10px 0;
+}
+
+.rsvp-note {
+    margin: 15px 0;
+    font-style: italic;
+    opacity: 0.9;
+}
+
+.anonymous-rsvp-section .auth-options {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.anonymous-rsvp-section .auth-options a {
+    color: #ffd700;
+    text-decoration: none;
+}
+
+.anonymous-rsvp-section .auth-options a:hover {
+    text-decoration: underline;
+}
+

@@ -432,24 +432,9 @@ def application(environ, start_response):
 
     # Routing for dynamic endpoints
     if path == '/':
-        # Check if user is logged in
-        user_id = get_user_from_session(environ)
-        if user_id:
-            # Find an event associated with this user
-            conn = sqlite3.connect(DB_PATH)
-            c = conn.cursor()
-            c.execute('SELECT event_id FROM invites WHERE user_id=? LIMIT 1', (user_id,))
-            row = c.fetchone()
-            conn.close()
-            event_id = row[0] if row else 1
-            start_response('302 Found', [('Location', f'/event/{event_id}')])
-            return [b'']
-        else:
-            # Show landing page with login and anonymous RSVP options
-            template = env.get_template('landing.html')
-            body = template.render(title='You\'re Invited!')
-            start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8')])
-            return [body.encode('utf-8')]
+        # Redirect directly to the main event page
+        start_response('302 Found', [('Location', '/event/1')])
+        return [b'']
 
     if path == '/register':
         if method == 'GET':
@@ -554,11 +539,8 @@ def application(environ, start_response):
             except ValueError:
                 start_response('404 Not Found', [('Content-Type', 'text/plain')])
                 return [b'Event not found']
-            # Ensure user is logged in
+            # Check if user is logged in (but don't require it)
             user_id = get_user_from_session(environ)
-            if not user_id:
-                start_response('302 Found', [('Location', '/login')])
-                return [b'']
             if method == 'GET':
                 # Fetch event details
                 conn = sqlite3.connect(DB_PATH)
@@ -572,18 +554,37 @@ def application(environ, start_response):
                     start_response('404 Not Found', [('Content-Type', 'text/plain')])
                     return [b'Event not found']
                 title, description, host, datetime_str, location, reg1, reg2, header_image = event
-                # Fetch user name and admin status
-                c.execute('SELECT name, is_admin FROM users WHERE id=?', (user_id,))
-                user_row = c.fetchone()
-                user_name = user_row[0] if user_row else 'Guest'
-                is_admin = user_row[1] if user_row else False
-                # Fetch RSVP status and quantities
-                c.execute('SELECT rsvp, adults_qty, kids_qty FROM invites WHERE event_id=? AND user_id=?',
-                          (event_id, user_id))
-                rsvp_row = c.fetchone()
-                rsvp_status = rsvp_row[0] if rsvp_row else None
-                adults_qty = rsvp_row[1] if rsvp_row else 1
-                kids_qty = rsvp_row[2] if rsvp_row else 0
+                
+                # Check for anonymous RSVP success message
+                query_string = environ.get('QUERY_STRING', '')
+                rsvp_success = None
+                if 'rsvp_success=' in query_string:
+                    try:
+                        rsvp_success = urllib.parse.parse_qs(query_string)['rsvp_success'][0]
+                    except:
+                        pass
+                
+                # Handle logged-in users
+                if user_id:
+                    # Fetch user name and admin status
+                    c.execute('SELECT name, is_admin FROM users WHERE id=?', (user_id,))
+                    user_row = c.fetchone()
+                    user_name = user_row[0] if user_row else 'Guest'
+                    is_admin = user_row[1] if user_row else False
+                    # Fetch RSVP status and quantities
+                    c.execute('SELECT rsvp, adults_qty, kids_qty FROM invites WHERE event_id=? AND user_id=?',
+                              (event_id, user_id))
+                    rsvp_row = c.fetchone()
+                    rsvp_status = rsvp_row[0] if rsvp_row else None
+                    adults_qty = rsvp_row[1] if rsvp_row else 1
+                    kids_qty = rsvp_row[2] if rsvp_row else 0
+                else:
+                    # Anonymous user viewing the event
+                    user_name = 'Guest'
+                    is_admin = False
+                    rsvp_status = rsvp_success  # Show success message if they just completed RSVP
+                    adults_qty = 1
+                    kids_qty = 0
                 # Fetch comments
                 c.execute('''SELECT comments.comment, users.name, comments.timestamp
                              FROM comments JOIN users ON comments.user_id = users.id
@@ -907,8 +908,8 @@ def application(environ, start_response):
                 # Send confirmation emails
                 send_rsvp_confirmation_emails(event_id, guest_name, guest_email, rsvp, adults_qty, kids_qty, is_anonymous=True)
                 
-                # Redirect to a thank you page or back to the event
-                start_response('302 Found', [('Location', f'/rsvp-thanks/{event_id}')])
+                # Redirect back to event page with success message
+                start_response('302 Found', [('Location', f'/event/{event_id}?rsvp_success={rsvp}')])
                 return [b'']
         
         start_response('404 Not Found', [('Content-Type', 'text/plain')])
