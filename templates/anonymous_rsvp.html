@@ -19,12 +19,20 @@
         <form method="POST" action="/anonymous-rsvp/{{ event_id }}">
             <div class="form-group">
                 <label for="guest_name">Your Name:</label>
-                <input type="text" id="guest_name" name="guest_name" required>
+                <input type="text" id="guest_name" name="guest_name" required value="{{ guest_name or '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="guest_phone">Your Phone Number:</label>
+                <input type="tel" id="guest_phone" name="guest_phone" required 
+                       placeholder="(555) 123-4567" value="{{ guest_phone or '' }}">
+                <small>Used to prevent duplicates. Use same number to update your RSVP.</small>
             </div>
             
             <div class="form-group">
                 <label for="guest_email">Your Email (optional):</label>
-                <input type="email" id="guest_email" name="guest_email" placeholder="For updates about the event">
+                <input type="email" id="guest_email" name="guest_email" 
+                       placeholder="For updates about the event" value="{{ guest_email or '' }}">
             </div>
             
             <div class="rsvp-options">
@@ -64,7 +72,14 @@
             </div>
             <div class="detail-item">
                 <span class="label">Date:</span>
-                <span class="value">{{ date_display }}<br>{{ time_display }}</span>
+                <span class="value">
+                    <a href="#" class="date-link" onclick="toggleCalendarOptions(event)">{{ date_display }}<br>{{ time_display }}</a>
+                    <div class="calendar-options-dropdown" id="calendar-options-anon" style="display: none;">
+                        <a href="{{ calendar_links.google }}" target="_blank">Add to Google Calendar</a>
+                        <a href="{{ calendar_links.outlook }}" target="_blank">Add to Outlook</a>
+                        <a href="/calendar/{{ event_id }}" download="event_{{ event_id }}.ics">Download for iPhone/Android</a>
+                    </div>
+                </span>
             </div>
             <div class="detail-item">
                 <span class="label">Location:</span>
@@ -100,6 +115,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
     rsvpYes.addEventListener('change', toggleQuantitySection);
     rsvpNo.addEventListener('change', toggleQuantitySection);
+});
+
+function toggleCalendarOptions(event) {
+    event.preventDefault();
+    const dropdown = document.getElementById('calendar-options-anon');
+    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'block';
+    } else {
+        dropdown.style.display = 'none';
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('calendar-options-anon');
+    const dateLink = event.target.closest('.date-link');
+    if (!dateLink && dropdown) {
+        dropdown.style.display = 'none';
+    }
 });
 </script>
 {% endblock %}

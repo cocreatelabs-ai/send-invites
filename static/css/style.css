@@ -1,10 +1,50 @@
 /* Basic styles for the invitation app */
 
 body {
-    background-color: #FCF9F2;
+    background: url('/static/images/background.jpg') center center/cover no-repeat,
+                linear-gradient(135deg, #a8e6cf 0%, #dcedc1 25%, #ffd3a5 50%, #ffd3e1 75%, #c2e9fb 100%);
+    background-attachment: fixed;
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+}
+
+/* Add top padding only when fixed header is present */
+body.has-fixed-header {
+    padding-top: 50px;
+}
+
+/* Fixed header for admin login */
+.fixed-header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px 20px;
+    border-bottom-left-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.admin-login-link {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.admin-login-link:hover {
+    text-decoration: underline;
+}
+
+/* Mobile optimization for background */
+@media (max-width: 768px) {
+    body {
+        background-attachment: scroll; /* Fixed backgrounds can cause issues on mobile */
+        background-size: cover;
+        background-position: center;
+    }
 }
 
 .container {
@@ -53,19 +93,27 @@ h1, h2, h3 {
 }
 
 .btn {
-    padding: 12px 24px;
-    border: 2px solid #333333;
-    border-radius: 4px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
     font-size: 16px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 500;
     cursor: pointer;
-    background-color: transparent;
+    background: rgba(255, 255, 255, 0.95);
     color: #333333;
     text-decoration: none;
-    transition: background-color 0.3s, color 0.3s;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .btn:hover:not(:disabled) {
-    background-color: #f0f0f0;
+    background: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    color: #333333;
 }
 
 .btn:disabled {
@@ -95,24 +143,177 @@ h1, h2, h3 {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 0 30px;
-    margin-bottom: 20px;
+    padding: 20px 30px;
+    margin-bottom: 30px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .detail-item {
     flex: 1;
     min-width: 220px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    text-align: center;
+    position: relative;
 }
 
 .detail-item .label {
-    font-weight: bold;
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #667eea;
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.detail-item .label::before {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 1px;
 }
 
 .detail-item .value {
+    font-family: 'Crimson Text', serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #2c3e50;
+    line-height: 1.4;
     display: block;
+}
+
+/* Add visual icons for different detail types */
+.detail-item:nth-child(1) .label::after {
+    content: '';
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 8px auto;
+    background: url("/static/images/host.svg") no-repeat center;
+    background-size: contain;
+}
+
+.detail-item:nth-child(2) .label::after {
+    content: '';
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 8px auto;
+    background: url("/static/images/calendar.svg") no-repeat center;
+    background-size: contain;
+}
+
+.detail-item:nth-child(3) .label::after {
+    content: '';
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 8px auto;
+    background: url("/static/images/map-pin.svg") no-repeat center;
+    background-size: contain;
+}
+
+/* Clickable location link styling */
+.location-link {
+    color: #2c3e50;
+    text-decoration: none;
+    font-family: 'Crimson Text', serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+    display: block;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.location-link:hover {
+    color: #667eea;
+    transform: translateY(-1px);
+}
+
+.location-link::after {
+    content: '🗺️';
+    font-size: 16px;
+    margin-left: 8px;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.location-link:hover::after {
+    opacity: 1;
+}
+
+/* Clickable date link styling */
+.date-link {
+    color: #2c3e50;
+    text-decoration: none;
+    font-family: 'Crimson Text', serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+    display: block;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.date-link:hover {
+    color: #667eea;
+    transform: translateY(-1px);
+}
+
+.date-link::after {
+    content: '📅';
+    font-size: 14px;
+    margin-left: 8px;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.date-link:hover::after {
+    opacity: 1;
+}
+
+/* Calendar options dropdown */
+.calendar-options-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    margin-top: 5px;
+    padding: 10px 0;
+}
+
+.calendar-options-dropdown a {
+    display: block;
+    padding: 8px 15px;
+    color: #2c3e50;
+    text-decoration: none;
+    font-family: 'Crimson Text', serif;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.calendar-options-dropdown a:hover {
+    background-color: #f8f9fa;
+    color: #667eea;
 }
 
 .registry {
@@ -293,13 +494,35 @@ form button:hover {
 }
 
 .btn-primary {
-    background-color: #0066cc;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #ffffff;
     margin-right: 10px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
 }
 
 .btn-primary:hover {
-    background-color: #0052a3;
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover::before {
+    left: 100%;
 }
 
 .btn-secondary {
@@ -1130,40 +1353,428 @@ form button:hover {
     }
 }
 
+/* RSVP form embedded in event page */
+.rsvp-form-section {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 30px;
+    margin: 30px 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.rsvp-form-section h3 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-family: 'Playfair Display', serif;
+}
+
+.rsvp-form-section .form-group {
+    margin-bottom: 20px;
+}
+
+.rsvp-form-section .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.rsvp-form-section .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.rsvp-form-section .form-group small {
+    display: block;
+    margin-top: 5px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.rsvp-form-section .rsvp-options {
+    margin: 25px 0;
+}
+
+.rsvp-form-section .rsvp-options h4 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.rsvp-form-section .rsvp-choice {
+    margin-bottom: 12px;
+}
+
+.rsvp-form-section .rsvp-choice input[type="radio"] {
+    width: auto;
+    margin-right: 10px;
+}
+
+.rsvp-form-section .rsvp-choice label {
+    display: inline;
+    font-weight: normal;
+}
+
+.rsvp-form-section .quantity-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.rsvp-form-section .quantity-section h4 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.rsvp-form-section .quantity-inputs {
+    display: flex;
+    gap: 20px;
+}
+
+.rsvp-form-section .quantity-group {
+    flex: 1;
+}
+
+.rsvp-form-section .quantity-group label {
+    margin-bottom: 8px;
+}
+
+.rsvp-form-section .quantity-group input {
+    width: 100%;
+}
+
+.rsvp-form-section .btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    margin-top: 20px;
+}
+
 /* Anonymous RSVP section on event page */
 .anonymous-rsvp-section {
     text-align: center;
-    padding: 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 10px;
-    color: white;
+    padding: 20px;
+    background: #f8f9fa;
+    border: 2px solid #667eea;
+    border-radius: 8px;
     margin: 20px 0;
 }
 
 .anonymous-rsvp-section .btn {
-    font-size: 1.1em;
-    padding: 15px 30px;
-    margin: 10px 0;
+    font-size: 1em;
+    padding: 12px 24px;
+    margin: 8px 0;
+    background: #667eea;
+    color: white;
+    border: none;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 5px;
+}
+
+.anonymous-rsvp-section .btn:hover {
+    background: #5a6fd8;
 }
 
 .rsvp-note {
-    margin: 15px 0;
+    margin: 10px 0;
     font-style: italic;
-    opacity: 0.9;
+    color: #6c757d;
+    font-size: 0.9em;
 }
 
 .anonymous-rsvp-section .auth-options {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #dee2e6;
+    font-size: 0.9em;
 }
 
 .anonymous-rsvp-section .auth-options a {
-    color: #ffd700;
+    color: #667eea;
     text-decoration: none;
 }
 
 .anonymous-rsvp-section .auth-options a:hover {
     text-decoration: underline;
+}
+
+/* Custom Links Generator */
+.custom-links-section {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 30px 0;
+}
+
+.custom-links-section h3 {
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+.link-generator {
+    max-width: 500px;
+}
+
+.link-generator .form-group {
+    margin-bottom: 15px;
+}
+
+.link-generator .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.link-generator .form-group input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.generated-link {
+    background: white;
+    border: 1px solid #28a745;
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.generated-link h4 {
+    color: #28a745;
+    margin-bottom: 10px;
+}
+
+.generated-link input {
+    font-family: monospace;
+    font-size: 13px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+}
+
+.btn.btn-small {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+/* ===============================
+   CALENDAR BUTTONS STYLES
+   =============================== */
+
+.calendar-section {
+    text-align: center;
+    margin: 30px 0;
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+.calendar-section h3 {
+    font-family: 'Playfair Display', serif;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+.calendar-section h4 {
+    font-family: 'Playfair Display', serif;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.calendar-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.calendar-btn {
+    padding: 12px 20px;
+    border: 2px solid;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.calendar-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.calendar-btn:hover::before {
+    left: 100%;
+}
+
+/* Inline calendar buttons for detail items */
+.calendar-buttons-inline {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.btn-calendar {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 16px;
+    line-height: 32px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-calendar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.google-cal {
+    background: #4285f4;
+    border-color: #4285f4;
+    color: white;
+}
+
+.google-cal:hover {
+    background: #3367d6;
+    border-color: #3367d6;
+    color: white;
+    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+}
+
+.outlook-cal {
+    background: #0078d4;
+    border-color: #0078d4;
+    color: white;
+}
+
+.outlook-cal:hover {
+    background: #106ebe;
+    border-color: #106ebe;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 120, 212, 0.3);
+}
+
+.apple-cal {
+    background: #007aff;
+    border-color: #007aff;
+    color: white;
+}
+
+.apple-cal:hover {
+    background: #0051d5;
+    border-color: #0051d5;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+}
+
+/* Calendar icons */
+.google-cal::before {
+    content: '📅';
+    font-size: 16px;
+}
+
+.outlook-cal::before {
+    content: '🗓️';
+    font-size: 16px;
+}
+
+.apple-cal::before {
+    content: '📲';
+    font-size: 16px;
+}
+
+/* Mobile responsive for calendar buttons */
+@media (max-width: 768px) {
+    .calendar-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .calendar-btn {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .calendar-section {
+        margin: 20px 0;
+        padding: 20px;
+    }
+    
+    .calendar-buttons-inline {
+        gap: 6px;
+    }
+    
+    .btn-calendar {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-section {
+        margin: 15px 0;
+        padding: 15px;
+    }
+    
+    .calendar-section h3 {
+        font-size: 1.1em;
+        margin-bottom: 15px;
+    }
+    
+    .calendar-section h4 {
+        font-size: 1em;
+        margin-bottom: 12px;
+    }
+    
+    .calendar-btn {
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+    
+    .calendar-buttons-inline {
+        gap: 4px;
+    }
+    
+    .btn-calendar {
+        width: 26px;
+        height: 26px;
+        line-height: 26px;
+        font-size: 12px;
+    }
 }
 

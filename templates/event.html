@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% if is_admin %}
 <div class="header-links">
-    {% if is_admin %}
-        <a href="/admin/event/{{ event_id }}" class="admin-link">Edit Event</a>
-        <span class="divider">|</span>
-        <a href="/admin/event/{{ event_id }}" class="admin-link">Track RSVPs</a>
-        <span class="divider">|</span>
-    {% endif %}
+    <a href="/admin/event/{{ event_id }}" class="admin-link">Edit Event</a>
+    <span class="divider">|</span>
+    <a href="/admin/event/{{ event_id }}" class="admin-link">Track RSVPs</a>
+    <span class="divider">|</span>
     <a href="/logout" class="logout-link">Logout</a>
 </div>
+{% endif %}
 
 <div class="event-card">
     {% if header_image %}
@@ -29,42 +29,70 @@
         <p>😔 Oh, sad to miss you! We'll be thinking of you.</p>
     </div>
     {% endif %}
-    <div class="rsvp-buttons">
-        {% if user_name == 'Guest' %}
-            <!-- Anonymous user - show RSVP link -->
-            <div class="anonymous-rsvp-section">
-                <a href="/anonymous-rsvp/{{ event_id }}" class="btn btn-primary btn-large">RSVP for this Event</a>
-                <p class="rsvp-note">Quick RSVP - just enter your name, no account needed</p>
-                <div class="auth-options">
-                    <p><a href="/login">Have an account? Login</a> | <a href="/register">Create account</a></p>
+    {% if user_name == 'Guest' and not rsvp_status %}
+    <!-- Anonymous RSVP form embedded in event page -->
+    <div class="rsvp-form-section">
+        <h3>RSVP for this Event</h3>
+        <form method="POST" action="/anonymous-rsvp/{{ event_id }}">
+            <div class="form-group">
+                <label for="guest_name">Your Name:</label>
+                <input type="text" id="guest_name" name="guest_name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="guest_phone">Your Phone Number:</label>
+                <input type="tel" id="guest_phone" name="guest_phone" required placeholder="(555) 123-4567">
+                <small>Use same number to update your RSVP</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="guest_email">Your Email (optional):</label>
+                <input type="email" id="guest_email" name="guest_email" placeholder="For updates about the event">
+            </div>
+            
+            <div class="rsvp-options">
+                <h4>Will you attend?</h4>
+                <div class="rsvp-choice">
+                    <input type="radio" id="rsvp_yes" name="rsvp" value="yes" required>
+                    <label for="rsvp_yes">Yes, I'll be there! 🎉</label>
+                </div>
+                <div class="rsvp-choice">
+                    <input type="radio" id="rsvp_no" name="rsvp" value="no" required>
+                    <label for="rsvp_no">Sorry, can't make it</label>
                 </div>
             </div>
-        {% else %}
-            <!-- Logged in user - show regular RSVP forms -->
-            <form method="POST" action="/event/{{ event_id }}" class="rsvp-form" id="rsvp-yes-form">
-                <input type="hidden" name="action" value="rsvp">
-                <input type="hidden" name="response" value="yes">
-                <button type="button" class="btn rsvp-yes" onclick="showQuantityFields()"{% if rsvp_status=='yes' %} disabled{% endif %}>Will attend</button>
-                
-                <div class="quantity-fields" id="quantity-fields" style="display: {% if rsvp_status=='yes' %}block{% else %}none{% endif %};">
+            
+            <div class="quantity-section" id="quantity_section" style="display: none;">
+                <h4>How many people?</h4>
+                <div class="quantity-inputs">
                     <div class="quantity-group">
                         <label for="adults_qty">Adults:</label>
-                        <input type="number" id="adults_qty" name="adults_qty" min="1" max="10" value="{{ adults_qty or 1 }}">
+                        <input type="number" id="adults_qty" name="adults_qty" min="1" max="10" value="1">
                     </div>
                     <div class="quantity-group">
                         <label for="kids_qty">Kids:</label>
-                        <input type="number" id="kids_qty" name="kids_qty" min="0" max="10" value="{{ kids_qty or 0 }}">
+                        <input type="number" id="kids_qty" name="kids_qty" min="0" max="10" value="0">
                     </div>
-                    <button type="submit" class="btn btn-confirm">Confirm Attendance</button>
                 </div>
-            </form>
-            <form method="POST" action="/event/{{ event_id }}">
-                <input type="hidden" name="action" value="rsvp">
-                <input type="hidden" name="response" value="no">
-                <button type="submit" class="btn rsvp-no"{% if rsvp_status=='no' %} disabled{% endif %}>Will not attend</button>
-            </form>
-        {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Submit RSVP</button>
+        </form>
+        
+        <script>
+        document.querySelectorAll('input[name="rsvp"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const quantitySection = document.getElementById('quantity_section');
+                if (this.value === 'yes') {
+                    quantitySection.style.display = 'block';
+                } else {
+                    quantitySection.style.display = 'none';
+                }
+            });
+        });
+        </script>
     </div>
+    {% endif %}
     
     <script>
     function showQuantityFields() {
@@ -79,11 +107,18 @@
         </div>
         <div class="detail-item">
             <span class="label">Date</span>
-            <span class="value">{{ date_display }}<br>{{ time_display }}</span>
+            <span class="value">
+                <a href="#" class="date-link" onclick="toggleCalendarOptions(event)">{{ date_display }}<br>{{ time_display }}</a>
+                <div class="calendar-options-dropdown" id="calendar-options" style="display: none;">
+                    <a href="{{ calendar_links.google }}" target="_blank">Add to Google Calendar</a>
+                    <a href="{{ calendar_links.outlook }}" target="_blank">Add to Outlook</a>
+                    <a href="/calendar/{{ event_id }}" download="event_{{ event_id }}.ics">Download for iPhone/Android</a>
+                </div>
+            </span>
         </div>
         <div class="detail-item">
             <span class="label">Address</span>
-            <span class="value">{{ location }}</span>
+            <a href="https://www.google.com/maps?q={{ location | urlencode }}" target="_blank" class="value location-link">{{ location }}</a>
         </div>
     </div>
     <div class="registry">
@@ -105,11 +140,46 @@
                 <li>No comments yet.</li>
             {% endif %}
         </ul>
-        <form method="POST" action="/event/{{ event_id }}" class="comment-form">
+        <form method="POST" action="/event/{{ event_id }}" class="comment-form" onsubmit="copyNameToComment()">
             <input type="hidden" name="action" value="comment">
-            <textarea name="comment" placeholder="Add a comment"></textarea>
+            <input type="hidden" name="comment_name" id="comment_name_hidden">
+            <textarea name="comment" placeholder="Add a comment" required></textarea>
             <button type="submit" class="btn">Post</button>
         </form>
+        
+        <script>
+        function copyNameToComment() {
+            const nameField = document.getElementById('guest_name');
+            const hiddenNameField = document.getElementById('comment_name_hidden');
+            if (nameField && hiddenNameField) {
+                let name = nameField.value.trim();
+                if (!name) {
+                    name = prompt('Please enter your name for the comment:');
+                }
+                hiddenNameField.value = name || 'Anonymous';
+            }
+            return true; // Allow form submission
+        }
+        
+        function toggleCalendarOptions(event) {
+            event.preventDefault();
+            const dropdown = document.getElementById('calendar-options');
+            if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.style.display = 'none';
+            }
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('calendar-options');
+            const dateLink = event.target.closest('.date-link');
+            if (!dateLink && dropdown) {
+                dropdown.style.display = 'none';
+            }
+        });
+        </script>
     </div>
 </div>
 {% endblock %}
