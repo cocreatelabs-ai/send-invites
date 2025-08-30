@@ -715,6 +715,114 @@ form button:hover {
     border-top: 2px solid #e9ecef;
 }
 
+/* CSV Import Styles */
+.csv-import-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #e9ecef;
+}
+
+.csv-import-section h3 {
+    margin-bottom: 20px;
+    color: #333333;
+}
+
+.csv-import-info {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 25px;
+    border-left: 4px solid #667eea;
+}
+
+.csv-import-info h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #495057;
+}
+
+.csv-import-info ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.csv-import-info li {
+    margin-bottom: 8px;
+    color: #6c757d;
+}
+
+.csv-import-form {
+    background-color: #ffffff;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 25px;
+    text-align: center;
+    transition: border-color 0.3s ease;
+}
+
+.csv-import-form:hover {
+    border-color: #667eea;
+}
+
+.csv-import-form .form-group {
+    margin-bottom: 20px;
+}
+
+.csv-import-form input[type="file"] {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.csv-import-form input[type="file"]:focus {
+    border-color: #667eea;
+    outline: none;
+}
+
+.import-results {
+    margin-top: 25px;
+    padding: 20px;
+    border-radius: 6px;
+}
+
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.import-results ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.import-results li {
+    margin-bottom: 5px;
+}
+
+.rsvp-tracking {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #e9ecef;
+}
+
 .rsvp-tracking h3 {
     margin-bottom: 20px;
     color: #333333;
@@ -752,6 +860,244 @@ form button:hover {
     color: #333333;
 }
 
+/* Guest List Enhanced Styles */
+.guest-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.guest-list-header h4 {
+    margin: 0;
+    color: #333333;
+}
+
+.guest-list-controls {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-controls,
+.search-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-controls label,
+.search-controls label {
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.filter-controls select,
+.search-controls input {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.guest-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.guest-card {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.guest-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.guest-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.guest-info {
+    flex: 1;
+}
+
+.guest-name {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.anonymous-badge,
+.registered-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.anonymous-badge {
+    background-color: #6c757d;
+    color: white;
+}
+
+.registered-badge {
+    background-color: #28a745;
+    color: white;
+}
+
+.guest-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.contact-icon {
+    font-size: 12px;
+}
+
+.contact-value {
+    font-family: 'Courier New', monospace;
+}
+
+.rsvp-status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.rsvp-status-badge.rsvp-yes {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.rsvp-status-badge.rsvp-no {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.rsvp-status-badge.rsvp-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.guest-details {
+    border-top: 1px solid #e9ecef;
+    padding-top: 15px;
+    margin-bottom: 15px;
+}
+
+.attendance-info {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 12px;
+}
+
+.attendance-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    min-width: 60px;
+}
+
+.attendance-item.total {
+    background-color: #e3f2fd;
+    border: 1px solid #bbdefb;
+}
+
+.attendance-label {
+    font-size: 11px;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.attendance-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.dietary-info {
+    background-color: #fff8e1;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border-left: 4px solid #ffc107;
+}
+
+.dietary-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #856404;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.dietary-text {
+    font-size: 14px;
+    color: #856404;
+    font-style: italic;
+}
+
+.guest-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.message-btn {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.message-btn:hover {
+    background-color: #138496;
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+    font-style: italic;
+}
+
 .guests-table {
     width: 100%;
     border-collapse: collapse;
@@ -776,6 +1122,31 @@ form button:hover {
 
 .guests-table tr:hover {
     background-color: #f8f9fa;
+}
+
+.actions-cell {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.copy-link-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.copy-link-btn:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+.copy-link-btn:active {
+    transform: translateY(0);
 }
 
 .rsvp-status {
@@ -984,44 +1355,78 @@ form button:hover {
 }
 
 .quantity-section {
-    margin: 20px 0;
+    margin-top: 20px;
     padding: 20px;
-    background-color: #e8f5e8;
-    border: 2px solid #28a745;
+    background: #f8f9fa;
     border-radius: 8px;
+    border: 1px solid #e9ecef;
 }
 
 .quantity-section h4 {
-    font-family: 'Playfair Display', serif;
-    color: #2c3e50;
     margin-bottom: 15px;
+    color: #495057;
+    font-size: 18px;
 }
 
 .quantity-inputs {
     display: flex;
     gap: 20px;
-    flex-wrap: wrap;
+    margin-bottom: 20px;
 }
 
-.quantity-inputs .quantity-group {
+.quantity-group {
     flex: 1;
-    min-width: 120px;
 }
 
-.quantity-inputs .quantity-group label {
-    font-family: 'Playfair Display', serif;
-    font-weight: 600;
-    color: #2c3e50;
+.quantity-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #495057;
 }
 
-.quantity-inputs .quantity-group input[type="number"] {
+.quantity-group input[type="number"] {
     width: 100%;
     padding: 8px 12px;
-    border: 2px solid #28a745;
-    border-radius: 6px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
     font-size: 16px;
-    text-align: center;
-    box-sizing: border-box;
+}
+
+.dietary-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.dietary-section h4 {
+    margin-bottom: 10px;
+    color: #495057;
+    font-size: 18px;
+}
+
+.dietary-help {
+    margin-bottom: 10px;
+    color: #6c757d;
+    font-size: 14px;
+    font-style: italic;
+}
+
+.dietary-section textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.dietary-section textarea:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .rsvp-submit {

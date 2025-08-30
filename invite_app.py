@@ -169,6 +169,8 @@ def init_db() -> None:
         kids_qty INTEGER DEFAULT 0,
         guest_name TEXT,
         guest_email TEXT,
+        guest_phone TEXT,
+        dietary_restrictions TEXT,
         is_anonymous BOOLEAN DEFAULT 0,
         FOREIGN KEY (event_id) REFERENCES events(id),
         FOREIGN KEY (user_id) REFERENCES users(id)
@@ -188,107 +190,6 @@ def init_db() -> None:
     )
     conn.commit()
 
-    # Add new columns to existing tables if they don't exist (migration)
-    try:
-        c.execute("ALTER TABLE invites ADD COLUMN adults_qty INTEGER DEFAULT 1")
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    try:
-        c.execute("ALTER TABLE invites ADD COLUMN kids_qty INTEGER DEFAULT 0")
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    try:
-        c.execute("ALTER TABLE invites ADD COLUMN guest_name TEXT")
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    try:
-        c.execute("ALTER TABLE invites ADD COLUMN guest_email TEXT")
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    try:
-        c.execute("ALTER TABLE invites ADD COLUMN is_anonymous BOOLEAN DEFAULT 0")
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    try:
-        c.execute("ALTER TABLE invites ADD COLUMN guest_phone TEXT")
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-
-    # Make user_id nullable for anonymous RSVPs
-    try:
-        # SQLite doesn't support ALTER COLUMN directly, so we need to recreate the table
-        c.execute(
-            """CREATE TABLE invites_new (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            event_id INTEGER NOT NULL,
-            user_id INTEGER,
-            rsvp TEXT,
-            adults_qty INTEGER DEFAULT 1,
-            kids_qty INTEGER DEFAULT 0,
-            guest_name TEXT,
-            guest_email TEXT,
-            guest_phone TEXT,
-            is_anonymous BOOLEAN DEFAULT 0,
-            FOREIGN KEY (event_id) REFERENCES events(id),
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        )"""
-        )
-
-        # Copy existing data
-        c.execute(
-            """INSERT INTO invites_new (id, event_id, user_id, rsvp, adults_qty, kids_qty, guest_name, guest_email, guest_phone, is_anonymous)
-                     SELECT id, event_id, user_id, rsvp, 
-                            COALESCE(adults_qty, 1), COALESCE(kids_qty, 0), 
-                            guest_name, guest_email, NULL, COALESCE(is_anonymous, 0)
-                     FROM invites"""
-        )
-
-        # Drop old table and rename new one
-        c.execute("DROP TABLE invites")
-        c.execute("ALTER TABLE invites_new RENAME TO invites")
-
-    except sqlite3.OperationalError as e:
-        # Table might already be migrated or migration failed
-        print(f"Migration note: {e}")
-        pass
-
-    # Migrate comments table to support anonymous comments
-    try:
-        # Check if comment_name column exists
-        c.execute("PRAGMA table_info(comments)")
-        columns = [row[1] for row in c.fetchall()]
-        if "comment_name" not in columns:
-            # Recreate comments table with new schema
-            c.execute(
-                """CREATE TABLE comments_new (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                event_id INTEGER NOT NULL,
-                user_id INTEGER,
-                comment TEXT NOT NULL,
-                comment_name TEXT,
-                timestamp REAL NOT NULL,
-                FOREIGN KEY (event_id) REFERENCES events(id),
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )"""
-            )
-
-            # Copy existing data
-            c.execute(
-                """INSERT INTO comments_new (id, event_id, user_id, comment, timestamp)
-                         SELECT id, event_id, user_id, comment, timestamp FROM comments"""
-            )
-
-            # Drop old table and rename new one
-            c.execute("DROP TABLE comments")
-            c.execute("ALTER TABLE comments_new RENAME TO comments")
-
-    except sqlite3.OperationalError as e:
-        # Table might already be migrated or migration failed
-        print(f"Comments migration note: {e}")
-        pass
-
-    conn.commit()
-
     # Create a default event if none exist. This initial invitation can be
     # customised later via database edits or by extending the application.
     c.execute("SELECT COUNT(*) FROM events")
@@ -300,8 +201,8 @@ def init_db() -> None:
             registry1, registry2, header_image
         ) VALUES (?,?,?,?,?,?,?,?)""",
             (
-                "A little pearl is on the way",
-                "Celebrate with us over love, laughter, and lunch as we await our baby's arrival.",
+                "Shubhi's Baby Shower!",
+                "",
                 "Rohan",
                 "2025-10-04T11:00:00",
                 "Beaver Lake Park - Lodge, 25101 SE 24th St, Sammamish, WA 98075",
@@ -344,6 +245,23 @@ def parse_post(environ) -> dict[str, str]:
     params = urllib.parse.parse_qs(body)
     # Flatten values: keep only the first value for each key
     return {k: v[0] for k, v in params.items()}
+
+
+def clean_phone_number(phone: str) -> str:
+    """Clean and format phone number"""
+    if not phone:
+        return ""
+
+    # Remove any non-digit characters except +
+    cleaned = "".join(c for c in phone if c.isdigit() or c == "+")
+
+    # If it's a US number without country code, add +1
+    if len(cleaned) == 10 and cleaned.isdigit():
+        cleaned = "+1" + cleaned
+    elif len(cleaned) == 11 and cleaned.startswith("1"):
+        cleaned = "+" + cleaned
+
+    return cleaned
 
 
 def generate_calendar_links(
@@ -477,6 +395,7 @@ def send_rsvp_confirmation_emails(
     rsvp: str,
     adults_qty: int,
     kids_qty: int,
+    dietary_restrictions: str = "",
     is_anonymous: bool = False,
 ):
     """Send RSVP confirmation emails to both guest and host."""
@@ -558,6 +477,8 @@ def send_rsvp_confirmation_emails(
                 
                 {f'<p><strong>Party size:</strong> {adults_qty} adult(s), {kids_qty} kid(s)</p>' if rsvp == 'yes' else ''}
                 
+                {f'<p><strong>Dietary restrictions:</strong> {dietary_restrictions}</p>' if rsvp == 'yes' and dietary_restrictions else ''}
+                
                 <p>{guest_message}</p>
                 
                 <p>Best regards,<br>{host_name}</p>
@@ -596,6 +517,7 @@ def send_rsvp_confirmation_emails(
                     <p><strong>Email:</strong> {guest_email or 'Not provided'}</p>
                     <p class="status">Status: {status_text.title()} {status_emoji}</p>
                     {f'<p><strong>Party size:</strong> {adults_qty} adult(s), {kids_qty} kid(s)</p>' if rsvp == 'yes' else ''}
+                    {f'<p><strong>Dietary restrictions:</strong> {dietary_restrictions}</p>' if rsvp == 'yes' and dietary_restrictions else ''}
                     <p><strong>RSVP Type:</strong> {'Anonymous' if is_anonymous else 'Account-based'}</p>
                 </div>
                 
@@ -975,17 +897,28 @@ def application(environ, start_response):
                             # Get quantities for attending guests
                             adults_qty = int(params.get("adults_qty", 1))
                             kids_qty = int(params.get("kids_qty", 0))
+                            dietary_restrictions = params.get(
+                                "dietary_restrictions", ""
+                            ).strip()
                         else:
-                            # For "no" response, clear quantities
+                            # For "no" response, clear quantities and dietary restrictions
                             adults_qty = 1
                             kids_qty = 0
+                            dietary_restrictions = ""
 
                         # Use INSERT OR REPLACE to handle both new RSVPs and updates
                         c.execute(
                             """INSERT OR REPLACE INTO invites 
-                                     (event_id, user_id, rsvp, adults_qty, kids_qty, is_anonymous)
-                                     VALUES (?, ?, ?, ?, ?, 0)""",
-                            (event_id, user_id, response, adults_qty, kids_qty),
+                                     (event_id, user_id, rsvp, adults_qty, kids_qty, dietary_restrictions, is_anonymous)
+                                     VALUES (?, ?, ?, ?, ?, ?, 0)""",
+                            (
+                                event_id,
+                                user_id,
+                                response,
+                                adults_qty,
+                                kids_qty,
+                                dietary_restrictions,
+                            ),
                         )
                         conn.commit()
 
@@ -1004,6 +937,7 @@ def application(environ, start_response):
                                 response,
                                 adults_qty,
                                 kids_qty,
+                                dietary_restrictions,
                                 is_anonymous=False,
                             )
                 elif action == "comment":
@@ -1095,7 +1029,7 @@ def application(environ, start_response):
                              COALESCE(u.name, i.guest_name) as name,
                              COALESCE(u.email, i.guest_email) as email,
                              i.guest_phone,
-                             i.rsvp, i.adults_qty, i.kids_qty, i.is_anonymous
+                             i.rsvp, i.adults_qty, i.kids_qty, i.is_anonymous, i.dietary_restrictions
                              FROM invites i
                              LEFT JOIN users u ON u.id = i.user_id 
                              WHERE i.event_id = ? 
@@ -1120,6 +1054,7 @@ def application(environ, start_response):
                     adults_qty,
                     kids_qty,
                     is_anonymous,
+                    dietary_restrictions,
                 ) in guest_rows:
                     guests.append(
                         {
@@ -1130,6 +1065,7 @@ def application(environ, start_response):
                             "adults_qty": adults_qty or 1,
                             "kids_qty": kids_qty or 0,
                             "is_anonymous": is_anonymous,
+                            "dietary_restrictions": dietary_restrictions or "",
                         }
                     )
 
@@ -1150,6 +1086,32 @@ def application(environ, start_response):
                     "total_kids": total_kids,
                 }
 
+                # Parse import results from query string
+                query_string = environ.get("QUERY_STRING", "")
+                import_results = None
+                if query_string:
+                    url_params = urllib.parse.parse_qs(query_string)
+                    if "success" in url_params:
+                        success_msg = url_params["success"][0]
+                        if success_msg.startswith("imported_"):
+                            parts = success_msg.split("_")
+                            import_results = {
+                                "success": True,
+                                "imported_count": int(parts[1]),
+                                "new_count": int(parts[3]),
+                                "updated_count": int(parts[5]),
+                                "errors": [],
+                            }
+                    elif "error" in url_params:
+                        error_msg = url_params["error"][0]
+                        import_results = {
+                            "success": False,
+                            "imported_count": 0,
+                            "new_count": 0,
+                            "updated_count": 0,
+                            "errors": [f"Import failed: {error_msg}"],
+                        }
+
                 template = env.get_template("admin.html")
                 body = template.render(
                     title="Admin - Edit Event",
@@ -1157,6 +1119,7 @@ def application(environ, start_response):
                     event_id=event_id,
                     guests=guests,
                     rsvp_stats=rsvp_stats,
+                    import_results=import_results,
                 )
                 start_response("200 OK", [("Content-Type", "text/html; charset=utf-8")])
                 return [body.encode("utf-8")]
@@ -1189,6 +1152,177 @@ def application(environ, start_response):
 
         start_response("404 Not Found", [("Content-Type", "text/plain")])
         return [b"Admin page not found"]
+
+    if path.startswith("/admin/import-csv/"):
+        segments = path.strip("/").split("/")
+        if len(segments) == 3:
+            try:
+                event_id = int(segments[2])
+            except ValueError:
+                start_response("404 Not Found", [("Content-Type", "text/plain")])
+                return [b"Event not found"]
+
+            # Ensure user is logged in and is admin
+            user_id = get_user_from_session(environ)
+            if not user_id:
+                start_response("302 Found", [("Location", "/login")])
+                return [b""]
+
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("SELECT is_admin FROM users WHERE id=?", (user_id,))
+            user_row = c.fetchone()
+            if not user_row or not user_row[0]:
+                conn.close()
+                start_response("403 Forbidden", [("Content-Type", "text/plain")])
+                return [b"Admin access required"]
+
+            if method == "POST":
+                # Handle CSV file upload
+                import csv
+                import io
+
+                try:
+                    # Parse multipart form data
+                    content_type = environ.get("CONTENT_TYPE", "")
+                    if not content_type.startswith("multipart/form-data"):
+                        start_response(
+                            "400 Bad Request", [("Content-Type", "text/plain")]
+                        )
+                        return [b"Invalid content type"]
+
+                    # Get the uploaded file data
+                    content_length = int(environ.get("CONTENT_LENGTH", 0))
+                    if content_length == 0:
+                        start_response(
+                            "400 Bad Request", [("Content-Type", "text/plain")]
+                        )
+                        return [b"No file uploaded"]
+
+                    post_data = environ["wsgi.input"].read(content_length)
+
+                    # Simple CSV parsing (basic multipart handling)
+                    # Find the CSV content between boundaries
+                    post_str = post_data.decode("utf-8", errors="ignore")
+
+                    # Look for CSV content (lines starting with data)
+                    lines = post_str.split("\n")
+                    csv_lines = []
+                    in_csv = False
+
+                    for line in lines:
+                        # Skip multipart headers and boundaries
+                        if (
+                            line.strip().startswith("--")
+                            or "Content-Disposition" in line
+                            or "Content-Type" in line
+                        ):
+                            continue
+                        if line.strip() == "":
+                            in_csv = True
+                            continue
+                        if in_csv and "," in line:
+                            csv_lines.append(line.strip())
+
+                    if not csv_lines:
+                        start_response(
+                            "302 Found",
+                            [
+                                (
+                                    "Location",
+                                    f"/admin/event/{event_id}?error=no_csv_data",
+                                )
+                            ],
+                        )
+                        return [b""]
+
+                    # Parse CSV data
+                    csv_content = "\n".join(csv_lines)
+                    csv_reader = csv.DictReader(io.StringIO(csv_content))
+
+                    import_results = {
+                        "success": True,
+                        "imported_count": 0,
+                        "new_count": 0,
+                        "updated_count": 0,
+                        "errors": [],
+                    }
+
+                    # Process each row
+                    for row_num, row in enumerate(csv_reader, 1):
+                        try:
+                            name = row.get("Name", "").strip()
+                            phone = row.get("Phone", "").strip()
+                            email = row.get("Email", "").strip()
+
+                            if not name or not phone:
+                                import_results["errors"].append(
+                                    f"Row {row_num}: Missing required Name or Phone"
+                                )
+                                continue
+
+                            # Clean phone number
+                            cleaned_phone = clean_phone_number(phone)
+
+                            # Check if invite already exists
+                            c.execute(
+                                "SELECT id FROM invites WHERE guest_phone=? AND event_id=? AND is_anonymous=1",
+                                (cleaned_phone, event_id),
+                            )
+                            existing = c.fetchone()
+
+                            if existing:
+                                # Update existing record
+                                c.execute(
+                                    """UPDATE invites SET guest_name=?, guest_email=? WHERE id=?""",
+                                    (name, email if email else None, existing[0]),
+                                )
+                                import_results["updated_count"] += 1
+                            else:
+                                # Create new invite record
+                                c.execute(
+                                    """INSERT INTO invites (event_id, guest_name, guest_email, guest_phone, is_anonymous)
+                                       VALUES (?, ?, ?, ?, 1)""",
+                                    (
+                                        event_id,
+                                        name,
+                                        email if email else None,
+                                        cleaned_phone,
+                                    ),
+                                )
+                                import_results["new_count"] += 1
+
+                            import_results["imported_count"] += 1
+
+                        except Exception as e:
+                            import_results["errors"].append(f"Row {row_num}: {str(e)}")
+                            continue
+
+                    conn.commit()
+                    conn.close()
+
+                    # Redirect back to admin page with results
+                    if import_results["imported_count"] > 0:
+                        message = f"success=imported_{import_results['imported_count']}_new_{import_results['new_count']}_updated_{import_results['updated_count']}"
+                    else:
+                        message = "error=no_valid_data"
+
+                    start_response(
+                        "302 Found",
+                        [("Location", f"/admin/event/{event_id}?{message}")],
+                    )
+                    return [b""]
+
+                except Exception as e:
+                    conn.close()
+                    start_response(
+                        "302 Found",
+                        [("Location", f"/admin/event/{event_id}?error=upload_failed")],
+                    )
+                    return [b""]
+
+        start_response("404 Not Found", [("Content-Type", "text/plain")])
+        return [b"CSV import not found"]
 
     if path.startswith("/anonymous-rsvp/"):
         segments = path.strip("/").split("/")
@@ -1273,6 +1407,7 @@ def application(environ, start_response):
                     error=None,
                     calendar_links=calendar_links,
                     base_url=BASE_URL,
+                    is_anonymous_link=True,
                 )
                 start_response("200 OK", [("Content-Type", "text/html; charset=utf-8")])
                 return [body.encode("utf-8")]
@@ -1284,6 +1419,7 @@ def application(environ, start_response):
                 guest_email = params.get("guest_email", "").strip()
                 guest_phone = params.get("guest_phone", "").strip()
                 rsvp = params.get("rsvp", "")
+                dietary_restrictions = params.get("dietary_restrictions", "").strip()
                 adults_qty = (
                     int(params.get("adults_qty", 1)) if params.get("adults_qty") else 1
                 )
@@ -1306,7 +1442,7 @@ def application(environ, start_response):
                     conn = sqlite3.connect(DB_PATH)
                     c = conn.cursor()
                     c.execute(
-                        """UPDATE invites SET guest_name=?, guest_email=?, rsvp=?, adults_qty=?, kids_qty=?
+                        """UPDATE invites SET guest_name=?, guest_email=?, rsvp=?, adults_qty=?, kids_qty=?, dietary_restrictions=?
                                  WHERE event_id=? AND guest_phone=? AND is_anonymous=1""",
                         (
                             guest_name,
@@ -1314,6 +1450,7 @@ def application(environ, start_response):
                             rsvp,
                             adults_qty,
                             kids_qty,
+                            dietary_restrictions,
                             event_id,
                             guest_phone,
                         ),
@@ -1329,6 +1466,7 @@ def application(environ, start_response):
                         rsvp,
                         adults_qty,
                         kids_qty,
+                        dietary_restrictions,
                         is_anonymous=True,
                     )
 
@@ -1389,6 +1527,7 @@ def application(environ, start_response):
                             error="Please fill in your name, phone number, and select an RSVP option.",
                             calendar_links=calendar_links,
                             base_url=BASE_URL,
+                            is_anonymous_link=True,
                         )
                         start_response(
                             "200 OK", [("Content-Type", "text/html; charset=utf-8")]
@@ -1399,8 +1538,8 @@ def application(environ, start_response):
                 conn = sqlite3.connect(DB_PATH)
                 c = conn.cursor()
                 c.execute(
-                    """INSERT INTO invites (event_id, guest_name, guest_email, guest_phone, rsvp, adults_qty, kids_qty, is_anonymous)
-                             VALUES (?, ?, ?, ?, ?, ?, ?, 1)""",
+                    """INSERT INTO invites (event_id, guest_name, guest_email, guest_phone, rsvp, adults_qty, kids_qty, dietary_restrictions, is_anonymous)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)""",
                     (
                         event_id,
                         guest_name,
@@ -1409,6 +1548,7 @@ def application(environ, start_response):
                         rsvp,
                         adults_qty,
                         kids_qty,
+                        dietary_restrictions,
                     ),
                 )
                 conn.commit()
@@ -1422,6 +1562,7 @@ def application(environ, start_response):
                     rsvp,
                     adults_qty,
                     kids_qty,
+                    dietary_restrictions,
                     is_anonymous=True,
                 )
 

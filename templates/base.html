@@ -26,7 +26,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body{% if not is_admin %} class="has-fixed-header"{% endif %}>
-    {% if not is_admin %}
+    {% if not is_admin and not is_anonymous_link %}
     <div class="hamburger-menu">
         <button class="hamburger-icon" onclick="toggleMenu()" aria-label="Menu">
             <span class="hamburger-line"></span>

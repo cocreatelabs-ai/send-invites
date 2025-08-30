@@ -118,6 +118,176 @@
         </script>
     </div>
     
+    <script>
+    // Function to copy invite links for guests
+    function copyInviteLink(name, phone, email) {
+        const baseUrl = window.location.origin + '/anonymous-rsvp/{{ event_id }}';
+        const params = new URLSearchParams();
+        params.append('name', name);
+        params.append('phone', phone);
+        if (email) params.append('email', email);
+        
+        const inviteLink = baseUrl + '?' + params.toString();
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(inviteLink).then(function() {
+            showCopyFeedback(event.target, '✅ Copied!');
+        }).catch(function() {
+            // Fallback for older browsers
+            fallbackCopyTextToClipboard(inviteLink);
+            showCopyFeedback(event.target, '✅ Copied!');
+        });
+    }
+    
+    // Function to create text message
+    function createTextMessage(name, phone, email) {
+        const baseUrl = window.location.origin + '/anonymous-rsvp/{{ event_id }}';
+        const params = new URLSearchParams();
+        params.append('name', name);
+        params.append('phone', phone);
+        if (email) params.append('email', email);
+        
+        const inviteLink = baseUrl + '?' + params.toString();
+        const firstName = name.split(',')[0].trim().replace(/"/g, '');
+        const message = `Hi ${firstName}! You're invited to our baby shower. Please RSVP here: ${inviteLink}`;
+        
+        // Copy message to clipboard
+        navigator.clipboard.writeText(message).then(function() {
+            showCopyFeedback(event.target, '✅ Message Copied!');
+        }).catch(function() {
+            fallbackCopyTextToClipboard(message);
+            showCopyFeedback(event.target, '✅ Message Copied!');
+        });
+    }
+    
+    // Helper function to show copy feedback
+    function showCopyFeedback(button, message) {
+        const originalText = button.textContent;
+        const originalBg = button.style.backgroundColor;
+        button.textContent = message;
+        button.style.backgroundColor = '#28a745';
+        
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.style.backgroundColor = originalBg;
+        }, 2000);
+    }
+    
+    // Fallback copy function for older browsers
+    function fallbackCopyTextToClipboard(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+    }
+    
+    // Filter guests by RSVP status
+    function filterGuests() {
+        const filterValue = document.getElementById('statusFilter').value;
+        const guestCards = document.querySelectorAll('.guest-card');
+        let visibleCount = 0;
+        
+        guestCards.forEach(card => {
+            const cardStatus = card.getAttribute('data-status');
+            if (filterValue === 'all' || cardStatus === filterValue) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        updateNoResultsDisplay(visibleCount);
+    }
+    
+    // Search guests by name, email, or phone
+    function searchGuests() {
+        const searchValue = document.getElementById('searchGuests').value.toLowerCase();
+        const guestCards = document.querySelectorAll('.guest-card');
+        let visibleCount = 0;
+        
+        guestCards.forEach(card => {
+            const searchData = card.getAttribute('data-search');
+            if (searchData.includes(searchValue)) {
+                // Also check filter
+                const filterValue = document.getElementById('statusFilter').value;
+                const cardStatus = card.getAttribute('data-status');
+                if (filterValue === 'all' || cardStatus === filterValue) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        updateNoResultsDisplay(visibleCount);
+    }
+    
+    // Update no results display
+    function updateNoResultsDisplay(visibleCount) {
+        const noResults = document.getElementById('noResults');
+        if (visibleCount === 0) {
+            noResults.style.display = 'block';
+        } else {
+            noResults.style.display = 'none';
+        }
+    }
+    </script>
+    
+    <div class="csv-import-section">
+        <h3>Bulk Import Guest List</h3>
+        <p>Upload a CSV file with guest information to generate invite links in bulk:</p>
+        
+        <div class="csv-import-info">
+            <h4>CSV Format Requirements:</h4>
+            <ul>
+                <li><strong>Required columns:</strong> Name, Phone</li>
+                <li><strong>Optional columns:</strong> Email</li>
+                <li><strong>Example header row:</strong> Name,Phone,Email</li>
+                <li><strong>Example data row:</strong> "John & Jane Smith",+15551234567,john@example.com</li>
+            </ul>
+        </div>
+        
+        <form method="POST" action="/admin/import-csv/{{ event_id }}" enctype="multipart/form-data" class="csv-import-form">
+            <div class="form-group">
+                <label for="csv_file">Select CSV File:</label>
+                <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Import Guests & Generate Links</button>
+        </form>
+        
+        {% if import_results %}
+        <div class="import-results">
+            <h4>Import Results:</h4>
+            {% if import_results.success %}
+                <div class="success-message">
+                    ✅ Successfully imported {{ import_results.imported_count }} guests!
+                    <ul>
+                        <li>New invites created: {{ import_results.new_count }}</li>
+                        <li>Existing invites updated: {{ import_results.updated_count }}</li>
+                    </ul>
+                </div>
+            {% endif %}
+            
+            {% if import_results.errors %}
+                <div class="error-message">
+                    ❌ Errors encountered:
+                    <ul>
+                        {% for error in import_results.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    
     <div class="rsvp-tracking">
         <h3>RSVP Tracking</h3>
         <div class="rsvp-summary">
@@ -151,48 +321,122 @@
         </div>
         
         <div class="guest-list">
-            <h4>Guest List</h4>
-            <table class="guests-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>RSVP Status</th>
-                        <th>Adults</th>
-                        <th>Kids</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for guest in guests %}
-                    <tr>
-                        <td>
-                            {{ guest.name }}
-                            {% if guest.is_anonymous %}
-                                <span class="anonymous-badge">Anonymous</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ guest.email or '—' }}</td>
-                        <td>{{ guest.phone or '—' }}</td>
-                        <td class="rsvp-status rsvp-{{ guest.rsvp or 'pending' }}">
-                            {% if guest.rsvp == 'yes' %}
-                                ✅ Attending
-                            {% elif guest.rsvp == 'no' %}
-                                ❌ Not Attending
-                            {% else %}
-                                ⏳ No Response
-                            {% endif %}
-                        </td>
-                        <td class="quantity-cell">
-                            {% if guest.rsvp == 'yes' %}{{ guest.adults_qty }}{% else %}—{% endif %}
-                        </td>
-                        <td class="quantity-cell">
-                            {% if guest.rsvp == 'yes' %}{{ guest.kids_qty }}{% else %}—{% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="guest-list-header">
+                <h4>Guest List ({{ guests|length }} guests)</h4>
+                <div class="guest-list-controls">
+                    <div class="filter-controls">
+                        <label for="statusFilter">Filter by Status:</label>
+                        <select id="statusFilter" onchange="filterGuests()">
+                            <option value="all">All Guests</option>
+                            <option value="yes">Attending</option>
+                            <option value="no">Not Attending</option>
+                            <option value="pending">No Response</option>
+                        </select>
+                    </div>
+                    <div class="search-controls">
+                        <label for="searchGuests">Search:</label>
+                        <input type="text" id="searchGuests" placeholder="Search by name, email, or phone" oninput="searchGuests()">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="guest-cards-container">
+                {% for guest in guests %}
+                <div class="guest-card" data-status="{{ guest.rsvp or 'pending' }}" data-search="{{ (guest.name + ' ' + (guest.email or '') + ' ' + (guest.phone or ''))|lower }}">
+                    <div class="guest-card-header">
+                        <div class="guest-info">
+                            <h5 class="guest-name">
+                                {{ guest.name }}
+                                {% if guest.is_anonymous %}
+                                    <span class="anonymous-badge">Anonymous Invite</span>
+                                {% else %}
+                                    <span class="registered-badge">Registered User</span>
+                                {% endif %}
+                            </h5>
+                            <div class="guest-contact">
+                                {% if guest.email %}
+                                    <div class="contact-item">
+                                        <span class="contact-icon">📧</span>
+                                        <span class="contact-value">{{ guest.email }}</span>
+                                    </div>
+                                {% endif %}
+                                {% if guest.phone %}
+                                    <div class="contact-item">
+                                        <span class="contact-icon">📱</span>
+                                        <span class="contact-value">{{ guest.phone }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="guest-status">
+                            <div class="rsvp-status-badge rsvp-{{ guest.rsvp or 'pending' }}">
+                                {% if guest.rsvp == 'yes' %}
+                                    <span class="status-icon">✅</span>
+                                    <span class="status-text">Attending</span>
+                                {% elif guest.rsvp == 'no' %}
+                                    <span class="status-icon">❌</span>
+                                    <span class="status-text">Not Attending</span>
+                                {% else %}
+                                    <span class="status-icon">⏳</span>
+                                    <span class="status-text">No Response</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if guest.rsvp == 'yes' %}
+                    <div class="guest-details">
+                        <div class="attendance-info">
+                            <div class="attendance-item">
+                                <span class="attendance-label">Adults:</span>
+                                <span class="attendance-value">{{ guest.adults_qty or 1 }}</span>
+                            </div>
+                            <div class="attendance-item">
+                                <span class="attendance-label">Kids:</span>
+                                <span class="attendance-value">{{ guest.kids_qty or 0 }}</span>
+                            </div>
+                            <div class="attendance-item total">
+                                <span class="attendance-label">Total:</span>
+                                <span class="attendance-value">{{ (guest.adults_qty or 1) + (guest.kids_qty or 0) }}</span>
+                            </div>
+                        </div>
+                        
+                        {% if guest.dietary_restrictions %}
+                        <div class="dietary-info">
+                            <span class="dietary-label">🍽️ Dietary Restrictions:</span>
+                            <span class="dietary-text">{{ guest.dietary_restrictions }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="guest-actions">
+                        {% if guest.phone and guest.is_anonymous %}
+                            <button type="button" 
+                                    class="btn btn-small copy-link-btn" 
+                                    onclick="copyInviteLink('{{ guest.name }}', '{{ guest.phone }}', '{{ guest.email or '' }}')"
+                                    title="Copy invite link">
+                                📋 Copy Invite Link
+                            </button>
+                        {% endif %}
+                        
+                        {% if guest.phone %}
+                            <button type="button" 
+                                    class="btn btn-small message-btn" 
+                                    onclick="createTextMessage('{{ guest.name }}', '{{ guest.phone }}', '{{ guest.email or '' }}')"
+                                    title="Create text message">
+                                💬 Text Message
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="no-results" id="noResults" style="display: none;">
+                <p>No guests match your search criteria.</p>
+            </div>
         </div>
     </div>
 </div>
