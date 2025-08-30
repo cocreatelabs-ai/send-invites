@@ -16,7 +16,6 @@
     <img src="/static/images/{{ header_image }}" class="header-image" alt="Invitation header">
     {% endif %}
     <h2>{{ title }}</h2>
-    <p class="to-line">To: {{ user_name }}</p>
     {% if description %}
     <p class="description">{{ description }}</p>
     {% endif %}
@@ -134,30 +133,60 @@
         <ul class="comments-list">
             {% if comments %}
                 {% for comment, name, timestamp in comments %}
-                    <li><strong>{{ name }}:</strong> {{ comment }}</li>
+                    <li class="comment-item">
+                        <div class="comment-header">
+                            <strong class="comment-author">{{ name }}</strong>
+                            <span class="comment-time">{{ timestamp }}</span>
+                        </div>
+                        <div class="comment-text">{{ comment }}</div>
+                    </li>
                 {% endfor %}
             {% else %}
-                <li>No comments yet.</li>
+                <li class="no-comments">No comments yet. Be the first to leave a message!</li>
             {% endif %}
         </ul>
-        <form method="POST" action="/event/{{ event_id }}" class="comment-form" onsubmit="copyNameToComment()">
+        <form method="POST" action="/event/{{ event_id }}" class="comment-form" onsubmit="return handleCommentSubmit()">
             <input type="hidden" name="action" value="comment">
-            <input type="hidden" name="comment_name" id="comment_name_hidden">
-            <textarea name="comment" placeholder="Add a comment" required></textarea>
-            <button type="submit" class="btn">Post</button>
+            <div class="form-group">
+                <label for="comment_name_input">Your Name:</label>
+                <input type="text" id="comment_name_input" name="comment_name" 
+                       value="{% if user_name and user_name != 'Guest' %}{{ user_name }}{% endif %}" 
+                       placeholder="Enter your name" required>
+            </div>
+            <div class="form-group">
+                <label for="comment_text">Comment:</label>
+                <textarea id="comment_text" name="comment" placeholder="Add a comment" required></textarea>
+            </div>
+            <button type="submit" class="btn">Post Comment</button>
         </form>
         
         <script>
-        function copyNameToComment() {
-            const nameField = document.getElementById('guest_name');
-            const hiddenNameField = document.getElementById('comment_name_hidden');
-            if (nameField && hiddenNameField) {
-                let name = nameField.value.trim();
-                if (!name) {
-                    name = prompt('Please enter your name for the comment:');
+        // Auto-populate name field when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const nameField = document.getElementById('comment_name_input');
+            
+            // If name field is empty, try to get it from various sources
+            if (!nameField.value.trim()) {
+                // First, try to get from RSVP form if available and filled
+                const rsvpNameField = document.getElementById('guest_name');
+                if (rsvpNameField && rsvpNameField.value.trim()) {
+                    nameField.value = rsvpNameField.value.trim();
                 }
-                hiddenNameField.value = name || 'Anonymous';
+                // Note: Session name is already populated via server-side template
             }
+        });
+        
+        function handleCommentSubmit() {
+            const nameField = document.getElementById('comment_name_input');
+            let name = nameField.value.trim();
+            
+            // If still no name, require user to enter one
+            if (!name) {
+                alert('Please enter your name for the comment.');
+                nameField.focus();
+                return false;
+            }
+            
             return true; // Allow form submission
         }
         

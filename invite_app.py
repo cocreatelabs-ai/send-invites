@@ -20,8 +20,64 @@ To run the app locally, execute this file directly:
 
     python invite_app.py
 
-and then visit http://localhost:8000 in your browser.
+and then visit the URL shown in the console in your browser.
 """
+
+import os
+import sqlite3
+import urllib.parse
+import http.cookies
+import hashlib
+import secrets
+import time
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.utils import formataddr
+
+from wsgiref.simple_server import make_server
+from wsgiref.util import setup_testing_defaults
+from wsgiref.headers import Headers
+
+import jinja2
+
+
+# Load environment variables
+def load_env():
+    """Load environment variables from .env file if it exists."""
+    env_file = os.path.join(os.path.dirname(__file__), ".env")
+    if os.path.exists(env_file):
+        with open(env_file, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, value = line.split("=", 1)
+                    os.environ.setdefault(key.strip(), value.strip())
+
+
+load_env()
+
+# -------------------------------------------------------------------
+# Configuration
+
+# Determine the directory of this script so we can locate templates and
+# static files relative to it. This makes the app portable when copied
+# to different environments.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+DB_PATH = os.path.join(BASE_DIR, "database.db")
+
+# Base URL configuration
+BASE_URL = os.environ.get("BASE_URL", "http://localhost:8000")
+
+# Email configuration (you can customize these)
+SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "")  # Your email
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")  # Your app password
+SMTP_FROM_NAME = os.environ.get("SMTP_FROM_NAME", "Event Host")
+SMTP_FROM_EMAIL = os.environ.get("SMTP_FROM_EMAIL", SMTP_USERNAME)
 
 import os
 import sqlite3
@@ -304,7 +360,7 @@ def generate_calendar_links(
         # Google Calendar expects UTC time in format: 20250425T093000Z
         start_time = dt.strftime("%Y%m%dT%H%M%S")
         # Assume 2 hour duration for the event
-        end_time = (dt + datetime.timedelta(hours=2)).strftime("%Y%m%dT%H%M%S")
+        end_time = (dt + datetime.timedelta(hours=3)).strftime("%Y%m%dT%H%M%S")
 
         # URL encode parameters
         encoded_title = urllib.parse.quote(title)
@@ -367,8 +423,23 @@ END:VCALENDAR"""
 
 def send_email(to_email: str, to_name: str, subject: str, body: str) -> bool:
     """Send an email notification. Returns True if successful, False otherwise."""
+    print(f"[EMAIL] Attempting to send email to {to_email}")
+    print(
+        f"[EMAIL] SMTP Config - Server: '{SMTP_SERVER}', Port: {SMTP_PORT}, Username: '{SMTP_USERNAME}'"
+    )
+
     if not SMTP_USERNAME or not SMTP_PASSWORD or not to_email:
-        print(f"Email not sent: Missing configuration or recipient email")
+        print(f"[EMAIL ERROR] Missing configuration or recipient email")
+        return False
+
+    # Test DNS resolution
+    try:
+        import socket
+
+        socket.gethostbyname(SMTP_SERVER)
+        print(f"[EMAIL] DNS resolution successful for {SMTP_SERVER}")
+    except Exception as e:
+        print(f"[EMAIL ERROR] DNS resolution failed for '{SMTP_SERVER}': {e}")
         return False
 
     try:
@@ -381,16 +452,21 @@ def send_email(to_email: str, to_name: str, subject: str, body: str) -> bool:
         html_part = MIMEText(body, "html")
         msg.attach(html_part)
 
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        print(f"[EMAIL] Connecting to {SMTP_SERVER}:{SMTP_PORT}...")
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=30) as server:
+            print(f"[EMAIL] Connected, starting TLS...")
             server.starttls()
+            print(f"[EMAIL] Logging in as {SMTP_USERNAME}...")
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            print(f"[EMAIL] Sending message...")
             server.send_message(msg)
 
-        print(f"Email sent successfully to {to_email}")
+        print(f"[EMAIL SUCCESS] Email sent successfully to {to_email}")
         return True
 
     except Exception as e:
-        print(f"Failed to send email to {to_email}: {e}")
+        print(f"[EMAIL ERROR] Failed to send email to {to_email}: {e}")
+        print(f"[EMAIL ERROR] Error type: {type(e).__name__}")
         return False
 
 
@@ -523,7 +599,7 @@ def send_rsvp_confirmation_emails(
                     <p><strong>RSVP Type:</strong> {'Anonymous' if is_anonymous else 'Account-based'}</p>
                 </div>
                 
-                <p>You can view all RSVPs in your <a href="http://localhost:8000/admin/event/{event_id}">admin panel</a>.</p>
+                <p>You can view all RSVPs in your <a href="{BASE_URL}/admin/event/{event_id}">admin panel</a>.</p>
                 
                 <p>Event: {event_title}<br>
                 Date: {date_display} at {time_display}</p>
@@ -811,7 +887,46 @@ def application(environ, start_response):
                              WHERE comments.event_id=? ORDER BY comments.timestamp ASC""",
                     (event_id,),
                 )
-                comments = c.fetchall()
+                raw_comments = c.fetchall()
+
+                # Format comments with readable timestamps
+                import datetime
+
+                comments = []
+                for comment_text, display_name, timestamp in raw_comments:
+                    if timestamp:
+                        try:
+                            # Convert timestamp to readable format
+                            dt = datetime.datetime.fromtimestamp(timestamp)
+                            now = datetime.datetime.now()
+                            diff = now - dt
+
+                            if diff.days > 0:
+                                if diff.days == 1:
+                                    time_ago = "1 day ago"
+                                else:
+                                    time_ago = f"{diff.days} days ago"
+                            elif diff.seconds > 3600:
+                                hours = diff.seconds // 3600
+                                if hours == 1:
+                                    time_ago = "1 hour ago"
+                                else:
+                                    time_ago = f"{hours} hours ago"
+                            elif diff.seconds > 60:
+                                minutes = diff.seconds // 60
+                                if minutes == 1:
+                                    time_ago = "1 minute ago"
+                                else:
+                                    time_ago = f"{minutes} minutes ago"
+                            else:
+                                time_ago = "just now"
+                        except Exception:
+                            time_ago = "recently"
+                    else:
+                        time_ago = "recently"
+
+                    comments.append((comment_text, display_name, time_ago))
+
                 conn.close()
                 # Format date/time for display (timezone naive)
                 import datetime
@@ -842,6 +957,7 @@ def application(environ, start_response):
                     adults_qty=adults_qty,
                     kids_qty=kids_qty,
                     calendar_links=calendar_links,
+                    base_url=BASE_URL,
                 )
                 start_response("200 OK", [("Content-Type", "text/html; charset=utf-8")])
                 return [body.encode("utf-8")]
@@ -891,20 +1007,29 @@ def application(environ, start_response):
                                 is_anonymous=False,
                             )
                 elif action == "comment":
+                    # Get current user from session
+                    current_user_id = get_user_from_session(environ)
+
                     comment_text = params.get("comment", "").strip()
                     comment_name = params.get("comment_name", "").strip()
                     print(
-                        f"Debug: comment_text='{comment_text}', comment_name='{comment_name}'"
+                        f"Debug: comment_text='{comment_text}', comment_name='{comment_name}', user_id={current_user_id}"
                     )
                     if comment_text and comment_name:
                         c.execute(
                             "INSERT INTO comments (event_id, user_id, comment, comment_name, timestamp) VALUES (?,?,?,?,?)",
-                            (event_id, None, comment_text, comment_name, time.time()),
+                            (
+                                event_id,
+                                current_user_id,
+                                comment_text,
+                                comment_name,
+                                time.time(),
+                            ),
                         )
                         conn.commit()
                         print(f"Debug: Comment inserted for event {event_id}")
                     else:
-                        print(f"Debug: Comment not inserted - missing text or name")
+                        print("Debug: Comment not inserted - missing text or name")
                 conn.close()
                 start_response("302 Found", [("Location", f"/event/{event_id}")])
                 return [b""]
@@ -1147,6 +1272,7 @@ def application(environ, start_response):
                     guest_email=prefill_email,
                     error=None,
                     calendar_links=calendar_links,
+                    base_url=BASE_URL,
                 )
                 start_response("200 OK", [("Content-Type", "text/html; charset=utf-8")])
                 return [body.encode("utf-8")]
@@ -1262,6 +1388,7 @@ def application(environ, start_response):
                             event_id=event_id,
                             error="Please fill in your name, phone number, and select an RSVP option.",
                             calendar_links=calendar_links,
+                            base_url=BASE_URL,
                         )
                         start_response(
                             "200 OK", [("Content-Type", "text/html; charset=utf-8")]
@@ -1361,6 +1488,7 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8000"))
     with make_server("", port, application) as httpd:
         print(f"Serving on port {port}... (Ctrl+C to stop)")
+        print(f"Visit: {BASE_URL}")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
