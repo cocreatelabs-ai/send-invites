@@ -172,8 +172,24 @@ def init_db() -> None:
         guest_phone TEXT,
         dietary_restrictions TEXT,
         is_anonymous BOOLEAN DEFAULT 0,
+        click_count INTEGER DEFAULT 0,
+        first_clicked_at REAL,
+        last_clicked_at REAL,
         FOREIGN KEY (event_id) REFERENCES events(id),
         FOREIGN KEY (user_id) REFERENCES users(id)
+    )"""
+    )
+    c.execute(
+        """CREATE TABLE IF NOT EXISTS invite_clicks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        invite_id INTEGER NOT NULL,
+        event_id INTEGER NOT NULL,
+        guest_phone TEXT,
+        clicked_at REAL NOT NULL,
+        ip_address TEXT,
+        user_agent TEXT,
+        FOREIGN KEY (invite_id) REFERENCES invites(id),
+        FOREIGN KEY (event_id) REFERENCES events(id)
     )"""
     )
     c.execute(
@@ -262,6 +278,62 @@ def clean_phone_number(phone: str) -> str:
         cleaned = "+" + cleaned
 
     return cleaned
+
+
+def track_invite_click(event_id: int, guest_phone: str, environ) -> None:
+    """Track when an invite link is clicked"""
+    try:
+        import time
+
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+
+        # Find the invite record
+        c.execute(
+            "SELECT id FROM invites WHERE guest_phone=? AND event_id=? AND is_anonymous=1",
+            (guest_phone, event_id),
+        )
+        invite_row = c.fetchone()
+
+        if invite_row:
+            invite_id = invite_row[0]
+            current_time = time.time()
+
+            # Get client info
+            ip_address = environ.get("REMOTE_ADDR", "unknown")
+            user_agent = environ.get("HTTP_USER_AGENT", "unknown")
+
+            # Update invite click statistics
+            c.execute(
+                """UPDATE invites SET 
+                   click_count = click_count + 1,
+                   last_clicked_at = ?,
+                   first_clicked_at = COALESCE(first_clicked_at, ?)
+                   WHERE id = ?""",
+                (current_time, current_time, invite_id),
+            )
+
+            # Record individual click
+            c.execute(
+                """INSERT INTO invite_clicks 
+                   (invite_id, event_id, guest_phone, clicked_at, ip_address, user_agent)
+                   VALUES (?, ?, ?, ?, ?, ?)""",
+                (
+                    invite_id,
+                    event_id,
+                    guest_phone,
+                    current_time,
+                    ip_address,
+                    user_agent,
+                ),
+            )
+
+            conn.commit()
+
+        conn.close()
+    except Exception:
+        # Don't let click tracking errors break the app
+        pass
 
 
 def generate_calendar_links(
@@ -1029,7 +1101,10 @@ def application(environ, start_response):
                              COALESCE(u.name, i.guest_name) as name,
                              COALESCE(u.email, i.guest_email) as email,
                              i.guest_phone,
-                             i.rsvp, i.adults_qty, i.kids_qty, i.is_anonymous, i.dietary_restrictions
+                             i.rsvp, i.adults_qty, i.kids_qty, i.is_anonymous, i.dietary_restrictions,
+                             COALESCE(i.click_count, 0) as click_count,
+                             i.first_clicked_at,
+                             i.last_clicked_at
                              FROM invites i
                              LEFT JOIN users u ON u.id = i.user_id 
                              WHERE i.event_id = ? 
@@ -1055,6 +1130,9 @@ def application(environ, start_response):
                     kids_qty,
                     is_anonymous,
                     dietary_restrictions,
+                    click_count,
+                    first_clicked_at,
+                    last_clicked_at,
                 ) in guest_rows:
                     guests.append(
                         {
@@ -1066,6 +1144,9 @@ def application(environ, start_response):
                             "kids_qty": kids_qty or 0,
                             "is_anonymous": is_anonymous,
                             "dietary_restrictions": dietary_restrictions or "",
+                            "click_count": click_count or 0,
+                            "first_clicked_at": first_clicked_at,
+                            "last_clicked_at": last_clicked_at,
                         }
                     )
 
@@ -1389,6 +1470,10 @@ def application(environ, start_response):
                     url_params.get("email", [""])[0] if "email" in url_params else ""
                 )
 
+                # Track invite click if phone number is provided
+                if prefill_phone:
+                    track_invite_click(event_id, prefill_phone, environ)
+
                 template = env.get_template("anonymous_rsvp.html")
                 body = template.render(
                     title=title,
@@ -1408,6 +1493,7 @@ def application(environ, start_response):
                     calendar_links=calendar_links,
                     base_url=BASE_URL,
                     is_anonymous_link=True,
+                    current_url=f"{BASE_URL}/anonymous-rsvp/{event_id}",
                 )
                 start_response("200 OK", [("Content-Type", "text/html; charset=utf-8")])
                 return [body.encode("utf-8")]

@@ -382,6 +382,20 @@
                                     <span class="status-text">No Response</span>
                                 {% endif %}
                             </div>
+                            
+                            {% if guest.is_anonymous and guest.click_count is defined %}
+                            <div class="click-tracking-info">
+                                <div class="click-count">
+                                    <span class="click-icon">👆</span>
+                                    <span class="click-text">{{ guest.click_count or 0 }} clicks</span>
+                                </div>
+                                {% if guest.last_clicked_at %}
+                                <div class="last-click">
+                                    <span class="last-click-text">Last clicked</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     
